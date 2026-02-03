@@ -12,11 +12,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.jspecify.annotations.NullMarked;
 
 @Document(collection = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@NullMarked
 public class User implements UserDetails {
     @Id
     private String id;
