@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.jspecify.annotations.NullMarked;
 
-@Document(collection = "users")
+@Document("fyp_user")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -49,23 +49,23 @@ public class User implements UserDetails {
         return this.password;
     }
 
-//    @Override
-//    public boolean isAccountNonExpired() {
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean isAccountNonLocked() {
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean isCredentialsNonExpired() {
-//        return true;
-//    }
-//
-//    @Override
-//    public boolean isEnabled() {
-//        return true;
-//    }
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
