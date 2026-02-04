@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.jspecify.annotations.NullMarked;
 
-@Document("fyp_user")
+@Document(collection = "fyp_users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
