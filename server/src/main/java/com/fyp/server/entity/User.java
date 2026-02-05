@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.jspecify.annotations.NullMarked;
+import java.util.Arrays;
 
 @Document(collection = "fyp_users")
 @Data
@@ -26,8 +27,8 @@ public class User implements UserDetails {
     private String name;
     private String email;
     private String password;
-    private String role;
-    private List<String> roles = new ArrayList<>();
+    private UserRole role;
+    private List<UserRole> roles = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -35,7 +36,7 @@ public class User implements UserDetails {
             return Collections.emptyList();
         }
         return roles.stream()
-                .map(SimpleGrantedAuthority::new)
+                .map(userRole -> new SimpleGrantedAuthority(userRole.getAuthority()))
                 .collect(Collectors.toList());
     }
 
