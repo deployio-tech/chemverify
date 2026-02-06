@@ -22,4 +22,13 @@ public class ragService {
                 .bodyToMono(String.class)
                 .block(); // blocks and waits for response
     }
+
+    public String sendDataToRender(Object data) {
+        return webClient.post()
+                .uri(baseUrl + "/api/data")
+                .bodyValue(data)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block(); // blocks and waits for response
+    }
 }
