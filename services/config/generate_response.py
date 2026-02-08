@@ -16,32 +16,41 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 #     "Content-Type": "application/json"
 # }
 def generate_response(results, query):
-   prompt = """
-        You are a chemical dermatologist with expertise in skincare ingredients and cosmetic chemistry.
+    prompt = f"""
+You are a chemical dermatologist with expertise in skincare ingredients and cosmetic chemistry.
 
-        Using the following context, identify the chemical compounds or active ingredients that can help resolve the given skin issue.
+Using the following context, identify the chemical compounds or active ingredients that can help resolve the given skin issue.
 
-        Context:
-        {results}
+Context:
+{results}
 
-        Task:
-        Extract the relevant compounds/ingredients effective for the skin condition.
-        For each compound:
-        - Provide the compound name
-        - Provide a one-line explanation of why it is used
+Skin Issue: {query}
 
-        Return the response strictly in the following JSON format and nothing else:
+Task:
+Extract the relevant compounds/ingredients effective for the skin condition.
+For each compound:
+- Provide the actual compound name (e.g., "Salicylic Acid", "Niacinamide", "Retinol")
+- Provide a one-line explanation of why it is used
 
-        {{
-          "skin_issue": "{query}",
-          "recommended_compounds": [
-            {{
-              "compound_name": "<name>",
-              "reason": "<one-line explanation>"
-            }}
-          ]
-        }}
-    """
+Return the response strictly in the following JSON format and nothing else. Replace the example values with actual data:
+
+Example response format:
+{{
+  "skin_issue": "acne",
+  "recommended_compounds": [
+    {{
+      "compound_name": "Salicylic Acid",
+      "reason": "A beta-hydroxy acid that exfoliates and unclogs pores to reduce acne breakouts."
+    }},
+    {{
+      "compound_name": "Benzoyl Peroxide",
+      "reason": "An antibacterial agent that kills acne-causing bacteria and reduces inflammation."
+    }}
+  ]
+}}
+
+Now provide the actual response for the given skin issue "{query}" using the context provided above:
+"""
     return ask_llm(prompt)
 
 def ask_llm(prompt):
