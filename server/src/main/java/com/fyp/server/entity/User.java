@@ -7,13 +7,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.jspecify.annotations.NullMarked;
-import java.util.Arrays;
 
 @Document(collection = "fyp_users")
 @Data
@@ -27,12 +23,11 @@ public class User implements UserDetails {
     private String name;
     private String email;
     private String password;
-    private UserRole role;
-    private List<UserRole> roles = new ArrayList<>();
+    private Set<UserRole> roles = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (roles == null || roles.isEmpty()) {
+        if (roles.isEmpty()) {
             return Collections.emptyList();
         }
         return roles.stream()
