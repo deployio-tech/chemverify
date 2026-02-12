@@ -32,11 +32,34 @@ const ExpertLogin = () => {
 
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          role: "DERMATOLOGIST",
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(errorData || "Login failed");
+      }
+
+      const data = await response.json();
+      localStorage.setItem("token", data.jwt);
+      localStorage.setItem("userId", data.id);
+      localStorage.setItem("role", data.role);
       navigate("/dashboard/expert");
-    }, 1500);
+    } catch (err: any) {
+      setError(err.message || "Login failed. Please check your credentials.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

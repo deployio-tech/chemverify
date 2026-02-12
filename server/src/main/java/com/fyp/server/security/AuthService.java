@@ -2,6 +2,7 @@ package com.fyp.server.security;
 
 
 import com.fyp.server.entity.User;
+import com.fyp.server.entity.UserRole;
 import com.fyp.server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NullMarked;
@@ -36,11 +37,22 @@ public class AuthService {
             throw new BadCredentialsException("Authentication principal is null");
         }
 
+        // Validate that the user has the requested role
+        String requestedRole = loginRequestDto.getRole();
+        if (requestedRole != null && !requestedRole.isEmpty()) {
+            UserRole expectedRole = UserRole.valueOf(requestedRole.toUpperCase());
+            boolean hasRole = user.getRoles().contains(expectedRole);
+            if (!hasRole) {
+                throw new BadCredentialsException("User does not have the required role: " + requestedRole);
+            }
+        }
+
         String token = authUtil.generateAccessToken(user);
 
          loginResponseDTO resp = new loginResponseDTO();
         resp.setJwt(token);
         resp.setId(user.getId());
+        resp.setRole(requestedRole != null ? requestedRole.toUpperCase() : "USER");
         return resp;
     }
 
