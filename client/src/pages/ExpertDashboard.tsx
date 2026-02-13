@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
   FlaskConical,
   Beaker,
   Sparkles,
@@ -16,38 +16,63 @@ import {
   TestTube,
   Shield,
   Zap,
-  Search
-} from 'lucide-react';
+  Search,
+} from "lucide-react";
 
 const ExpertDashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'formulate' | 'analyze' | 'library'>('formulate');
-  const [skinType, setSkinType] = useState('');
+  const [activeTab, setActiveTab] = useState<
+    "formulate" | "analyze" | "library"
+  >("formulate");
+  const [skinType, setSkinType] = useState("");
   const [skinConcerns, setSkinConcerns] = useState<string[]>([]);
-  const [productType, setProductType] = useState('');
-  const [concentration, setConcentration] = useState('standard');
-  const [excludeIngredients, setExcludeIngredients] = useState('');
-  const [includeIngredients, setIncludeIngredients] = useState('');
+  const [productType, setProductType] = useState("");
+  const [concentration, setConcentration] = useState("standard");
+  const [excludeIngredients, setExcludeIngredients] = useState("");
+  const [includeIngredients, setIncludeIngredients] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
-  const skinTypes = ['Normal', 'Dry', 'Oily', 'Combination', 'Sensitive', 'Mature'];
-  
+  const skinTypes = [
+    "Normal",
+    "Dry",
+    "Oily",
+    "Combination",
+    "Sensitive",
+    "Mature",
+  ];
+
   const skinConcernOptions = [
-    'Acne', 'Aging', 'Hyperpigmentation', 'Dehydration', 'Redness',
-    'Uneven Texture', 'Dark Circles', 'Large Pores', 'Dullness', 'Eczema'
+    "Acne",
+    "Aging",
+    "Hyperpigmentation",
+    "Dehydration",
+    "Redness",
+    "Uneven Texture",
+    "Dark Circles",
+    "Large Pores",
+    "Dullness",
+    "Eczema",
   ];
 
   const productTypes = [
-    'Serum', 'Moisturizer', 'Cleanser', 'Toner', 'Sunscreen',
-    'Eye Cream', 'Face Mask', 'Exfoliant', 'Essence', 'Spot Treatment'
+    "Serum",
+    "Moisturizer",
+    "Cleanser",
+    "Toner",
+    "Sunscreen",
+    "Eye Cream",
+    "Face Mask",
+    "Exfoliant",
+    "Essence",
+    "Spot Treatment",
   ];
 
   const toggleConcern = (concern: string) => {
-    setSkinConcerns(prev => 
-      prev.includes(concern) 
-        ? prev.filter(c => c !== concern)
-        : [...prev, concern]
+    setSkinConcerns((prev) =>
+      prev.includes(concern)
+        ? prev.filter((c) => c !== concern)
+        : [...prev, concern],
     );
   };
 
@@ -74,13 +99,16 @@ const ExpertDashboard = () => {
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-slate-400">
+            <button
+              className="flex items-center gap-2 text-sm text-slate-400 hover:text-blue-400 transition-colors"
+              onClick={() => navigate("/profile/expert")}
+            >
               <Stethoscope className="w-4 h-4" />
-              <span>Expert User</span>
-            </div>
-            <button 
+              <span>My Profile</span>
+            </button>
+            <button
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-slate-300 border border-slate-600 hover:bg-slate-700 transition-all"
-              onClick={() => navigate('/logout')}
+              onClick={() => navigate("/logout")}
             >
               <LogOut className="w-4 h-4" />
               Logout
@@ -96,7 +124,8 @@ const ExpertDashboard = () => {
             AI Formulation Studio
           </h1>
           <p className="text-slate-400">
-            Generate safe, AI-powered cosmetic formulations with clinical-grade ingredient recommendations.
+            Generate safe, AI-powered cosmetic formulations with clinical-grade
+            ingredient recommendations.
           </p>
         </div>
 
@@ -104,40 +133,40 @@ const ExpertDashboard = () => {
         <div className="flex gap-2 mb-8 bg-slate-800 p-1 rounded-xl w-fit">
           <button
             className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-              activeTab === 'formulate' 
-                ? 'bg-blue-600 text-white' 
-                : 'text-slate-400 hover:text-white'
+              activeTab === "formulate"
+                ? "bg-blue-600 text-white"
+                : "text-slate-400 hover:text-white"
             }`}
-            onClick={() => setActiveTab('formulate')}
+            onClick={() => setActiveTab("formulate")}
           >
             <Beaker className="w-4 h-4 inline mr-2" />
             Generate Formulation
           </button>
           <button
             className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-              activeTab === 'analyze' 
-                ? 'bg-blue-600 text-white' 
-                : 'text-slate-400 hover:text-white'
+              activeTab === "analyze"
+                ? "bg-blue-600 text-white"
+                : "text-slate-400 hover:text-white"
             }`}
-            onClick={() => setActiveTab('analyze')}
+            onClick={() => setActiveTab("analyze")}
           >
             <TestTube className="w-4 h-4 inline mr-2" />
             Analyze Formula
           </button>
           <button
             className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-              activeTab === 'library' 
-                ? 'bg-blue-600 text-white' 
-                : 'text-slate-400 hover:text-white'
+              activeTab === "library"
+                ? "bg-blue-600 text-white"
+                : "text-slate-400 hover:text-white"
             }`}
-            onClick={() => setActiveTab('library')}
+            onClick={() => setActiveTab("library")}
           >
             <BookOpen className="w-4 h-4 inline mr-2" />
             Ingredient Library
           </button>
         </div>
 
-        {activeTab === 'formulate' && (
+        {activeTab === "formulate" && (
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Form */}
             <div className="lg:col-span-2 space-y-6">
@@ -161,8 +190,10 @@ const ExpertDashboard = () => {
                         onChange={(e) => setProductType(e.target.value)}
                       >
                         <option value="">Select product type...</option>
-                        {productTypes.map(type => (
-                          <option key={type} value={type}>{type}</option>
+                        {productTypes.map((type) => (
+                          <option key={type} value={type}>
+                            {type}
+                          </option>
                         ))}
                       </select>
                       <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -181,8 +212,10 @@ const ExpertDashboard = () => {
                         onChange={(e) => setSkinType(e.target.value)}
                       >
                         <option value="">Select skin type...</option>
-                        {skinTypes.map(type => (
-                          <option key={type} value={type}>{type}</option>
+                        {skinTypes.map((type) => (
+                          <option key={type} value={type}>
+                            {type}
+                          </option>
                         ))}
                       </select>
                       <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -197,19 +230,23 @@ const ExpertDashboard = () => {
                   <Sparkles className="w-5 h-5 text-amber-400" />
                   Target Skin Concerns *
                 </h2>
-                <p className="text-sm text-slate-400 mb-4">Select one or more concerns to address</p>
+                <p className="text-sm text-slate-400 mb-4">
+                  Select one or more concerns to address
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {skinConcernOptions.map((concern) => (
                     <button
                       key={concern}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         skinConcerns.includes(concern)
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-700 text-slate-300 border border-slate-600 hover:border-slate-500'
+                          ? "bg-blue-600 text-white"
+                          : "bg-slate-700 text-slate-300 border border-slate-600 hover:border-slate-500"
                       }`}
                       onClick={() => toggleConcern(concern)}
                     >
-                      {skinConcerns.includes(concern) && <X className="w-3 h-3 inline mr-1" />}
+                      {skinConcerns.includes(concern) && (
+                        <X className="w-3 h-3 inline mr-1" />
+                      )}
                       {concern}
                     </button>
                   ))}
@@ -226,9 +263,11 @@ const ExpertDashboard = () => {
                     <Settings2 className="w-5 h-5 text-slate-400" />
                     Advanced Options
                   </span>
-                  <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${advancedOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown
+                    className={`w-5 h-5 text-slate-400 transition-transform ${advancedOpen ? "rotate-180" : ""}`}
+                  />
                 </button>
-                
+
                 {advancedOpen && (
                   <div className="px-6 pb-6 space-y-6 border-t border-slate-700 pt-6">
                     {/* Concentration */}
@@ -237,19 +276,21 @@ const ExpertDashboard = () => {
                         Active Concentration Level
                       </label>
                       <div className="flex gap-2">
-                        {['low', 'standard', 'high', 'clinical'].map((level) => (
-                          <button
-                            key={level}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-all ${
-                              concentration === level
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-slate-700 text-slate-300 border border-slate-600 hover:border-slate-500'
-                            }`}
-                            onClick={() => setConcentration(level)}
-                          >
-                            {level}
-                          </button>
-                        ))}
+                        {["low", "standard", "high", "clinical"].map(
+                          (level) => (
+                            <button
+                              key={level}
+                              className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-all ${
+                                concentration === level
+                                  ? "bg-blue-600 text-white"
+                                  : "bg-slate-700 text-slate-300 border border-slate-600 hover:border-slate-500"
+                              }`}
+                              onClick={() => setConcentration(level)}
+                            >
+                              {level}
+                            </button>
+                          ),
+                        )}
                       </div>
                     </div>
 
@@ -286,7 +327,12 @@ const ExpertDashboard = () => {
               <button
                 className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold hover:from-blue-700 hover:to-blue-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleGenerate}
-                disabled={isGenerating || !skinType || !productType || skinConcerns.length === 0}
+                disabled={
+                  isGenerating ||
+                  !skinType ||
+                  !productType ||
+                  skinConcerns.length === 0
+                }
               >
                 {isGenerating ? (
                   <>
@@ -306,34 +352,48 @@ const ExpertDashboard = () => {
             <div className="space-y-6">
               {/* Quick Stats */}
               <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-                <h3 className="text-sm font-semibold text-white mb-4">Session Statistics</h3>
+                <h3 className="text-sm font-semibold text-white mb-4">
+                  Session Statistics
+                </h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-400">Formulations today</span>
+                    <span className="text-sm text-slate-400">
+                      Formulations today
+                    </span>
                     <span className="text-lg font-bold text-white">7</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-400">Exported reports</span>
+                    <span className="text-sm text-slate-400">
+                      Exported reports
+                    </span>
                     <span className="text-lg font-bold text-white">3</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-slate-400">API credits</span>
-                    <span className="text-lg font-bold text-emerald-400">847</span>
+                    <span className="text-lg font-bold text-emerald-400">
+                      847
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* Features */}
               <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-                <h3 className="text-sm font-semibold text-white mb-4">Professional Features</h3>
+                <h3 className="text-sm font-semibold text-white mb-4">
+                  Professional Features
+                </h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <Shield className="w-5 h-5 text-emerald-400" />
-                    <span className="text-sm text-slate-300">FDA Compliance Check</span>
+                    <span className="text-sm text-slate-300">
+                      FDA Compliance Check
+                    </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Zap className="w-5 h-5 text-amber-400" />
-                    <span className="text-sm text-slate-300">Synergy Analysis</span>
+                    <span className="text-sm text-slate-300">
+                      Synergy Analysis
+                    </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <FileDown className="w-5 h-5 text-blue-400" />
@@ -341,7 +401,9 @@ const ExpertDashboard = () => {
                   </div>
                   <div className="flex items-center gap-3">
                     <TestTube className="w-5 h-5 text-purple-400" />
-                    <span className="text-sm text-slate-300">Stability Prediction</span>
+                    <span className="text-sm text-slate-300">
+                      Stability Prediction
+                    </span>
                   </div>
                 </div>
               </div>
@@ -349,20 +411,30 @@ const ExpertDashboard = () => {
               {/* Recent Formulations */}
               <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-semibold text-white">Recent Formulations</h3>
-                  <button className="text-xs text-blue-400 hover:text-blue-300">View All</button>
+                  <h3 className="text-sm font-semibold text-white">
+                    Recent Formulations
+                  </h3>
+                  <button className="text-xs text-blue-400 hover:text-blue-300">
+                    View All
+                  </button>
                 </div>
                 <div className="space-y-3">
                   <div className="p-3 bg-slate-700/50 rounded-lg">
-                    <p className="text-sm text-white font-medium">Anti-Aging Serum</p>
+                    <p className="text-sm text-white font-medium">
+                      Anti-Aging Serum
+                    </p>
                     <p className="text-xs text-slate-400">2 hours ago</p>
                   </div>
                   <div className="p-3 bg-slate-700/50 rounded-lg">
-                    <p className="text-sm text-white font-medium">Hydrating Moisturizer</p>
+                    <p className="text-sm text-white font-medium">
+                      Hydrating Moisturizer
+                    </p>
                     <p className="text-xs text-slate-400">5 hours ago</p>
                   </div>
                   <div className="p-3 bg-slate-700/50 rounded-lg">
-                    <p className="text-sm text-white font-medium">Acne Spot Treatment</p>
+                    <p className="text-sm text-white font-medium">
+                      Acne Spot Treatment
+                    </p>
                     <p className="text-xs text-slate-400">Yesterday</p>
                   </div>
                 </div>
@@ -371,12 +443,15 @@ const ExpertDashboard = () => {
           </div>
         )}
 
-        {activeTab === 'analyze' && (
+        {activeTab === "analyze" && (
           <div className="bg-slate-800 rounded-2xl border border-slate-700 p-8 text-center">
             <TestTube className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2">Formula Analyzer</h3>
+            <h3 className="text-lg font-semibold text-white mb-2">
+              Formula Analyzer
+            </h3>
             <p className="text-slate-400 mb-6">
-              Upload or paste an existing formulation to analyze ingredient interactions and safety.
+              Upload or paste an existing formulation to analyze ingredient
+              interactions and safety.
             </p>
             <button className="btn-primary">
               <Plus className="w-4 h-4" />
@@ -385,12 +460,15 @@ const ExpertDashboard = () => {
           </div>
         )}
 
-        {activeTab === 'library' && (
+        {activeTab === "library" && (
           <div className="bg-slate-800 rounded-2xl border border-slate-700 p-8 text-center">
             <BookOpen className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2">Ingredient Library</h3>
+            <h3 className="text-lg font-semibold text-white mb-2">
+              Ingredient Library
+            </h3>
             <p className="text-slate-400 mb-6">
-              Access our database of 750k+ validated chemical compounds with detailed safety profiles.
+              Access our database of 750k+ validated chemical compounds with
+              detailed safety profiles.
             </p>
             <button className="btn-primary">
               <Search className="w-4 h-4" />
@@ -404,4 +482,3 @@ const ExpertDashboard = () => {
 };
 
 export default ExpertDashboard;
-

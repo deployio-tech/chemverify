@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  Search, 
-  Upload, 
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Search,
+  Upload,
   FlaskConical,
   Shield,
   AlertCircle,
@@ -11,24 +11,24 @@ import {
   LogOut,
   User,
   FileText,
-  History
-} from 'lucide-react';
+  History,
+} from "lucide-react";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'analyze' | 'history'>('analyze');
-  const [inputType, setInputType] = useState<'text' | 'image'>('text');
-  const [ingredientInput, setIngredientInput] = useState('');
-  const [skinType, setSkinType] = useState('');
+  const [activeTab, setActiveTab] = useState<"analyze" | "history">("analyze");
+  const [inputType, setInputType] = useState<"text" | "image">("text");
+  const [ingredientInput, setIngredientInput] = useState("");
+  const [skinType, setSkinType] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const skinTypes = [
-    'Normal',
-    'Dry',
-    'Oily',
-    'Combination',
-    'Sensitive',
-    'Acne-Prone'
+    "Normal",
+    "Dry",
+    "Oily",
+    "Combination",
+    "Sensitive",
+    "Acne-Prone",
   ];
 
   const handleAnalyze = async () => {
@@ -56,13 +56,16 @@ const UserDashboard = () => {
             </span>
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-slate-600">
+            <button
+              className="flex items-center gap-2 text-sm text-slate-600 hover:text-blue-600 transition-colors"
+              onClick={() => navigate("/profile/user")}
+            >
               <User className="w-4 h-4" />
-              <span>Regular User</span>
-            </div>
-            <button 
+              <span>My Profile</span>
+            </button>
+            <button
               className="btn-secondary text-sm py-2 px-4"
-              onClick={() => navigate('/logout')}
+              onClick={() => navigate("/logout")}
             >
               <LogOut className="w-4 h-4" />
               Logout
@@ -78,7 +81,8 @@ const UserDashboard = () => {
             Ingredient Safety Analyzer
           </h1>
           <p className="text-slate-600">
-            Analyze cosmetic products and verify chemical ingredients for skin safety and compliance.
+            Analyze cosmetic products and verify chemical ingredients for skin
+            safety and compliance.
           </p>
         </div>
 
@@ -86,29 +90,29 @@ const UserDashboard = () => {
         <div className="flex gap-4 mb-8">
           <button
             className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              activeTab === 'analyze' 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+              activeTab === "analyze"
+                ? "bg-blue-600 text-white"
+                : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
             }`}
-            onClick={() => setActiveTab('analyze')}
+            onClick={() => setActiveTab("analyze")}
           >
             <Search className="w-4 h-4 inline mr-2" />
             Analyze Ingredients
           </button>
           <button
             className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              activeTab === 'history' 
-                ? 'bg-blue-600 text-white' 
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+              activeTab === "history"
+                ? "bg-blue-600 text-white"
+                : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
             }`}
-            onClick={() => setActiveTab('history')}
+            onClick={() => setActiveTab("history")}
           >
             <History className="w-4 h-4 inline mr-2" />
             Analysis History
           </button>
         </div>
 
-        {activeTab === 'analyze' && (
+        {activeTab === "analyze" && (
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Input Section */}
             <div className="lg:col-span-2">
@@ -121,29 +125,29 @@ const UserDashboard = () => {
                 <div className="flex gap-2 mb-6">
                   <button
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      inputType === 'text'
-                        ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                      inputType === "text"
+                        ? "bg-blue-50 text-blue-600 border border-blue-200"
+                        : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100"
                     }`}
-                    onClick={() => setInputType('text')}
+                    onClick={() => setInputType("text")}
                   >
                     <FileText className="w-4 h-4 inline mr-2" />
                     Text Input
                   </button>
                   <button
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      inputType === 'image'
-                        ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                        : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                      inputType === "image"
+                        ? "bg-blue-50 text-blue-600 border border-blue-200"
+                        : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100"
                     }`}
-                    onClick={() => setInputType('image')}
+                    onClick={() => setInputType("image")}
                   >
                     <Upload className="w-4 h-4 inline mr-2" />
                     Upload Image
                   </button>
                 </div>
 
-                {inputType === 'text' ? (
+                {inputType === "text" ? (
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -183,10 +187,12 @@ const UserDashboard = () => {
                         key={type}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                           skinType === type
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
+                            ? "bg-blue-600 text-white"
+                            : "bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100"
                         }`}
-                        onClick={() => setSkinType(skinType === type ? '' : type)}
+                        onClick={() =>
+                          setSkinType(skinType === type ? "" : type)
+                        }
                       >
                         {type}
                       </button>
@@ -219,26 +225,38 @@ const UserDashboard = () => {
             <div className="space-y-6">
               {/* Quick Stats */}
               <div className="bg-white rounded-2xl border border-slate-200 p-6">
-                <h3 className="text-sm font-semibold text-slate-900 mb-4">Your Activity</h3>
+                <h3 className="text-sm font-semibold text-slate-900 mb-4">
+                  Your Activity
+                </h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600">Analyses today</span>
+                    <span className="text-sm text-slate-600">
+                      Analyses today
+                    </span>
                     <span className="text-lg font-bold text-slate-900">3</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600">Products saved</span>
+                    <span className="text-sm text-slate-600">
+                      Products saved
+                    </span>
                     <span className="text-lg font-bold text-slate-900">12</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-600">Safe products</span>
-                    <span className="text-lg font-bold text-emerald-600">89%</span>
+                    <span className="text-sm text-slate-600">
+                      Safe products
+                    </span>
+                    <span className="text-lg font-bold text-emerald-600">
+                      89%
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* Safety Legend */}
               <div className="bg-white rounded-2xl border border-slate-200 p-6">
-                <h3 className="text-sm font-semibold text-slate-900 mb-4">Safety Indicators</h3>
+                <h3 className="text-sm font-semibold text-slate-900 mb-4">
+                  Safety Indicators
+                </h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <CheckCircle className="w-5 h-5 text-emerald-500" />
@@ -246,27 +264,35 @@ const UserDashboard = () => {
                   </div>
                   <div className="flex items-center gap-3">
                     <AlertCircle className="w-5 h-5 text-amber-500" />
-                    <span className="text-sm text-slate-600">Use with caution</span>
+                    <span className="text-sm text-slate-600">
+                      Use with caution
+                    </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Shield className="w-5 h-5 text-red-500" />
-                    <span className="text-sm text-slate-600">Potentially harmful</span>
+                    <span className="text-sm text-slate-600">
+                      Potentially harmful
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* Tips */}
               <div className="bg-blue-50 rounded-2xl p-6">
-                <h3 className="text-sm font-semibold text-blue-900 mb-2">💡 Pro Tip</h3>
+                <h3 className="text-sm font-semibold text-blue-900 mb-2">
+                  💡 Pro Tip
+                </h3>
                 <p className="text-sm text-blue-700">
-                  For best results, copy the full ingredient list from the product packaging. Our AI works better with complete information.
+                  For best results, copy the full ingredient list from the
+                  product packaging. Our AI works better with complete
+                  information.
                 </p>
               </div>
             </div>
           </div>
         )}
 
-        {activeTab === 'history' && (
+        {activeTab === "history" && (
           <div className="bg-white rounded-2xl border border-slate-200 p-6">
             <p className="text-slate-500 text-center py-12">
               No analysis history yet. Start by analyzing your first product!
