@@ -35,6 +35,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/dermatologist/**").hasRole("DERMATOLOGIST")
                         .requestMatchers("/api/user/**").hasAnyRole("USER", "DERMATOLOGIST", "ADMIN")
+                        .requestMatchers("/api/users/**").hasAnyRole("USER", "DERMATOLOGIST", "ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
