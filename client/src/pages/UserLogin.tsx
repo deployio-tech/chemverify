@@ -9,14 +9,25 @@ import {
   ArrowLeft,
   Loader2,
 } from "lucide-react";
+import OtpVerification from "../components/OtpVerification";
+
+type LoginStep = "credentials" | "otp";
 
 const UserLogin = () => {
   const navigate = useNavigate();
+  const [step, setStep] = useState<LoginStep>("credentials");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Store login response data to use after OTP verification
+  const [pendingLoginData, setPendingLoginData] = useState<{
+    jwt: string;
+    id: string;
+    role: string;
+  } | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +41,7 @@ const UserLogin = () => {
     setIsLoading(true);
 
     try {
+      // Step 1: Validate credentials
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
@@ -48,16 +60,51 @@ const UserLogin = () => {
       }
 
       const data = await response.json();
-      localStorage.setItem("token", data.jwt);
-      localStorage.setItem("userId", data.id);
-      localStorage.setItem("role", data.role);
-      navigate("/dashboard/user");
+      // Don't store token yet — wait for OTP verification
+      setPendingLoginData(data);
+
+      // Step 2: Send OTP
+      const otpResponse = await fetch("/api/auth/otp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, purpose: "LOGIN_VERIFY" }),
+      });
+
+      if (!otpResponse.ok) {
+        throw new Error("Failed to send verification code");
+      }
+
+      // Move to OTP step
+      setStep("otp");
     } catch (err: any) {
       setError(err.message || "Login failed. Please check your credentials.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleOtpVerified = () => {
+    // OTP verified — now store login data and navigate
+    if (pendingLoginData) {
+      localStorage.setItem("token", pendingLoginData.jwt);
+      localStorage.setItem("userId", pendingLoginData.id);
+      localStorage.setItem("role", pendingLoginData.role);
+    }
+    navigate("/dashboard/user");
+  };
+
+  // Show OTP verification screen
+  if (step === "otp") {
+    return (
+      <OtpVerification
+        email={email}
+        purpose="LOGIN_VERIFY"
+        onVerified={handleOtpVerified}
+        onBack={() => setStep("credentials")}
+        accentColor="blue"
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex flex-col">
@@ -156,12 +203,13 @@ const UserLogin = () => {
                 />
                 <span className="text-sm text-slate-600">Remember me</span>
               </label>
-              <a
-                href="#forgot"
+              <button
+                type="button"
+                onClick={() => navigate("/forgot-password")}
                 className="text-sm text-blue-600 hover:text-blue-700"
               >
                 Forgot password?
-              </a>
+              </button>
             </div>
 
             {/* Submit Button */}

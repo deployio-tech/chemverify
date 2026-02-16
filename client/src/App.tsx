@@ -8,6 +8,7 @@ import ExpertDashboard from "./pages/ExpertDashboard";
 import UserProfile from "./pages/UserProfile";
 import ExpertProfile from "./pages/ExpertProfile";
 import LogoutPage from "./pages/LogoutPage";
+import ForgotPassword from "./pages/ForgotPassword";
 import "./index.css";
 
 function App() {
@@ -21,6 +22,9 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/login/user" element={<UserLogin />} />
         <Route path="/login/expert" element={<ExpertLogin />} />
+
+        {/* Forgot Password */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Dashboards */}
         <Route path="/dashboard/user" element={<UserDashboard />} />
