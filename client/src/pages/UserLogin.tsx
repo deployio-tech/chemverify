@@ -13,6 +13,8 @@ import OtpVerification from "../components/OtpVerification";
 
 type LoginStep = "credentials" | "otp";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+
 const UserLogin = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState<LoginStep>("credentials");
@@ -42,7 +44,7 @@ const UserLogin = () => {
 
     try {
       // Step 1: Validate credentials
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch(`${API_BASE_URL}/api/user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -64,7 +66,7 @@ const UserLogin = () => {
       setPendingLoginData(data);
 
       // Step 2: Send OTP
-      const otpResponse = await fetch("/api/auth/otp/send", {
+      const otpResponse = await fetch(`${API_BASE_URL}/api/auth/otp/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, purpose: "LOGIN_VERIFY" }),
