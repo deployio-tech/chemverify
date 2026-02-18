@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   UserSearch,
   Mail,
@@ -8,28 +8,33 @@ import {
   EyeOff,
   ArrowLeft,
   Loader2,
+  CheckCircle2,
 } from "lucide-react";
-import OtpVerification from "../components/OtpVerification";
 
-type LoginStep = "credentials" | "otp";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 const UserLogin = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState<LoginStep>("credentials");
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [signupSuccess, setSignupSuccess] = useState(false);
 
-  // Store login response data to use after OTP verification
-  const [pendingLoginData, setPendingLoginData] = useState<{
-    jwt: string;
-    id: string;
-    role: string;
-  } | null>(null);
+  // Check if redirected from signup
+  useEffect(() => {
+    if (location.state?.signupSuccess) {
+      setSignupSuccess(true);
+      // Clear the state so it doesn't persist on refresh
+      window.history.replaceState({}, document.title);
+      // Auto-dismiss after 5 seconds
+      const timer = setTimeout(() => setSignupSuccess(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,8 +48,7 @@ const UserLogin = () => {
     setIsLoading(true);
 
     try {
-      // Step 1: Validate credentials
-      const response = await fetch(`${API_BASE_URL}/api/user`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -62,51 +66,20 @@ const UserLogin = () => {
       }
 
       const data = await response.json();
-      // Don't store token yet — wait for OTP verification
-      setPendingLoginData(data);
 
-      // Step 2: Send OTP
-      const otpResponse = await fetch(`${API_BASE_URL}/api/auth/otp/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, purpose: "LOGIN_VERIFY" }),
-      });
+      // Store JWT token and user info
+      localStorage.setItem("token", data.jwt);
+      localStorage.setItem("userId", data.id);
+      localStorage.setItem("role", data.role);
 
-      if (!otpResponse.ok) {
-        throw new Error("Failed to send verification code");
-      }
-
-      // Move to OTP step
-      setStep("otp");
+      // Navigate to user dashboard
+      navigate("/dashboard/user");
     } catch (err: any) {
       setError(err.message || "Login failed. Please check your credentials.");
     } finally {
       setIsLoading(false);
     }
   };
-
-  const handleOtpVerified = () => {
-    // OTP verified — now store login data and navigate
-    if (pendingLoginData) {
-      localStorage.setItem("token", pendingLoginData.jwt);
-      localStorage.setItem("userId", pendingLoginData.id);
-      localStorage.setItem("role", pendingLoginData.role);
-    }
-    navigate("/dashboard/user");
-  };
-
-  // Show OTP verification screen
-  if (step === "otp") {
-    return (
-      <OtpVerification
-        email={email}
-        purpose="LOGIN_VERIFY"
-        onVerified={handleOtpVerified}
-        onBack={() => setStep("credentials")}
-        accentColor="blue"
-      />
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex flex-col">
@@ -137,6 +110,21 @@ const UserLogin = () => {
         <p className="text-slate-600 text-center mb-8">
           Access product analysis and ingredient verification
         </p>
+
+        {/* Signup Success Banner */}
+        {signupSuccess && (
+          <div className="w-full max-w-md mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3 animate-fadeIn">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-medium text-emerald-800">
+                Account created successfully!
+              </p>
+              <p className="text-xs text-emerald-600">
+                Please log in with your credentials.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Login Form */}
         <div className="w-full max-w-md">
@@ -287,15 +275,26 @@ const UserLogin = () => {
           {/* Sign Up Link */}
           <p className="text-center mt-6 text-sm text-slate-600">
             Don't have an account?{" "}
-            <a
-              href="#signup"
+            <button
+              onClick={() => navigate("/signup")}
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
               Create one
-            </a>
+            </button>
           </p>
         </div>
       </main>
+
+      {/* Animations */}
+      <style>{`
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 };

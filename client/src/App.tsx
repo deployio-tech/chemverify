@@ -9,6 +9,7 @@ import UserProfile from "./pages/UserProfile";
 import ExpertProfile from "./pages/ExpertProfile";
 import LogoutPage from "./pages/LogoutPage";
 import ForgotPassword from "./pages/ForgotPassword";
+import UserSignup from "./pages/UserSignup";
 import "./index.css";
 
 function App() {
@@ -25,6 +26,9 @@ function App() {
 
         {/* Forgot Password */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
+
+        {/* Signup */}
+        <Route path="/signup" element={<UserSignup />} />
 
         {/* Dashboards */}
         <Route path="/dashboard/user" element={<UserDashboard />} />

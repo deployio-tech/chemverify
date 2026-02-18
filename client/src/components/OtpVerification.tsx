@@ -12,11 +12,15 @@ import {
 
 interface OtpVerificationProps {
   email: string;
-  purpose: "LOGIN_VERIFY" | "FORGOT_PASSWORD";
+  purpose: "LOGIN_VERIFY" | "FORGOT_PASSWORD" | "SIGNUP_VERIFY";
   onVerified: () => void;
   onBack: () => void;
   accentColor?: string; // tailwind color like "blue" or "emerald"
+  verifyUrl?: string; // optional custom verify endpoint
 }
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 const OtpVerification = ({
   email,
@@ -24,6 +28,7 @@ const OtpVerification = ({
   onVerified,
   onBack,
   accentColor = "blue",
+  verifyUrl,
 }: OtpVerificationProps) => {
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -120,11 +125,14 @@ const OtpVerification = ({
       setError("");
 
       try {
-        const response = await fetch("/api/auth/otp/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, otp: otpCode, purpose }),
-        });
+        const response = await fetch(
+          verifyUrl || `${API_BASE_URL}/api/auth/otp/verify`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, otp: otpCode, purpose }),
+          },
+        );
 
         if (!response.ok) {
           const data = await response.json();
@@ -153,7 +161,7 @@ const OtpVerification = ({
     setError("");
 
     try {
-      const response = await fetch("/api/auth/otp/send", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/otp/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, purpose }),
