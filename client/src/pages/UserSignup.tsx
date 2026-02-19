@@ -12,6 +12,7 @@ import {
   User,
 } from "lucide-react";
 import OtpVerification from "../components/OtpVerification";
+import { sileo } from "sileo";
 
 type SignupStep = "form" | "otp";
 
@@ -104,6 +105,7 @@ const UserSignup = () => {
 
   const handleOtpVerified = () => {
     // OTP verified — user is saved in backend. Redirect to login.
+    sileo.success({ title: "Signup successful!" });
     navigate("/login/user", {
       state: { signupSuccess: true },
     });
@@ -435,11 +437,11 @@ const UserSignup = () => {
             )}
 
             {/* Error Message */}
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 animate-fadeIn">
-                {error}
-              </div>
-            )}
+            {error &&
+              sileo.error({
+                title: "Something went wrong",
+                description: error,
+              })}
 
             {/* Submit Button */}
             <button
@@ -448,10 +450,7 @@ const UserSignup = () => {
               className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
             >
               {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Creating account...
-                </>
+                <></>
               ) : (
                 <>
                   <UserPlus className="w-5 h-5" />

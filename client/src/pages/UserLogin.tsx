@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { sileo } from "sileo";
 import {
   UserSearch,
   Mail,
@@ -73,6 +74,7 @@ const UserLogin = () => {
       localStorage.setItem("role", data.role);
 
       // Navigate to user dashboard
+      sileo.success({ title: "Login successful!" });
       navigate("/dashboard/user");
     } catch (err: any) {
       setError(err.message || "Login failed. Please check your credentials.");
@@ -276,7 +278,7 @@ const UserLogin = () => {
           <p className="text-center mt-6 text-sm text-slate-600">
             Don't have an account?{" "}
             <button
-              onClick={() => navigate("/signup")}
+              onClick={() => navigate("/sign")}
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
               Create one
