@@ -7,7 +7,6 @@ import {
   Eye,
   EyeOff,
   ArrowLeft,
-  Loader2,
   Phone,
   User,
 } from "lucide-react";
