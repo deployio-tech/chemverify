@@ -7,6 +7,7 @@ import {
   Eye,
   EyeOff,
   ArrowLeft,
+  Home,
   Phone,
   User,
 } from "lucide-react";
@@ -126,8 +127,16 @@ const UserSignup = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex flex-col">
-      {/* Back Button */}
-      <div className="p-6">
+      {/* Navigation Buttons */}
+      <div className="p-6 flex items-center gap-4">
+        <button
+          className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
+          onClick={() => navigate("/")}
+        >
+          <Home className="w-4 h-4" />
+          Home
+        </button>
+        <span className="text-slate-300">|</span>
         <button
           className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
           onClick={() => navigate("/login")}

@@ -8,6 +8,7 @@ import {
   Eye,
   EyeOff,
   ArrowLeft,
+  Home,
   Loader2,
   CheckCircle2,
 } from "lucide-react";
@@ -85,14 +86,21 @@ const UserLogin = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex flex-col">
-      {/* Back Button */}
-      <div className="p-6">
+      {/* Back Buttons */}
+      <div className="p-6 flex items-center justify-between">
         <button
           className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
           onClick={() => navigate("/login")}
         >
           <ArrowLeft className="w-4 h-4" />
           Back to selection
+        </button>
+        <button
+          className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"
+          onClick={() => navigate("/")}
+        >
+          <Home className="w-4 h-4" />
+          Back to Home
         </button>
       </div>
 
@@ -278,7 +286,7 @@ const UserLogin = () => {
           <p className="text-center mt-6 text-sm text-slate-600">
             Don't have an account?{" "}
             <button
-              onClick={() => navigate("/sign")}
+              onClick={() => navigate("/signup")}
               className="text-blue-600 hover:text-blue-700 font-medium"
             >
               Create one
