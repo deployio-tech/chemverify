@@ -23,6 +23,8 @@ public class User implements UserDetails {
     private String name;
     private String email;
     private String password;
+    private String phone;
+    private String gender;
     private Set<UserRole> roles = new HashSet<>();
 
     @Override
