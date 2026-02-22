@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Search,
@@ -21,6 +21,8 @@ const UserDashboard = () => {
   const [ingredientInput, setIngredientInput] = useState("");
   const [skinType, setSkinType] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const skinTypes = [
     "Normal",
@@ -31,14 +33,60 @@ const UserDashboard = () => {
     "Acne-Prone",
   ];
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      setSelectedFile(file);
+    } else {
+      setSelectedFile(null);
+      alert("Please select a valid image file (e.g., PNG, JPG, WEBP).");
+    }
+    // Reset input so re-selecting the same file triggers change
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleAnalyze = async () => {
-    if (!ingredientInput.trim()) return;
+    if (inputType === "text" && !ingredientInput.trim()) return;
+    if (inputType === "image" && !selectedFile) return;
+
     setIsAnalyzing(true);
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      if (inputType === "text") {
+        // Parse ingredients into a lowercase array
+        const ingredientsArray = ingredientInput
+          .split(/[,\n]+/)
+          .map((item) => item.trim().toLowerCase())
+          .filter((item) => item.length > 0);
+
+        console.log("Ingredients array:", ingredientsArray);
+
+        // TODO: Replace with actual API call
+        // Example: await fetch('/api/analyze', { method: 'POST', body: JSON.stringify({ ingredients: ingredientsArray, skinType }) })
+      } else {
+        // Image upload flow
+        const formData = new FormData();
+        formData.append("image", selectedFile!);
+        if (skinType) formData.append("skinType", skinType);
+
+        console.log("Uploading image:", selectedFile!.name);
+
+        // TODO: Replace with actual API call
+        // Example: await fetch('/api/analyze-image', { method: 'POST', body: formData })
+      }
+
+      // Simulate API call delay for now
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+    } catch (error) {
+      console.error("Analysis failed:", error);
+    } finally {
       setIsAnalyzing(false);
-      // Navigate to results or show results
-    }, 2000);
+    }
   };
 
   return (
@@ -162,17 +210,61 @@ const UserDashboard = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-blue-400 transition-colors cursor-pointer">
-                    <Upload className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                    <p className="text-slate-600 mb-2">
-                      Drag and drop an image of the ingredient list
-                    </p>
-                    <p className="text-sm text-slate-400 mb-4">
-                      or click to browse your files
-                    </p>
-                    <button className="btn-secondary text-sm">
-                      Choose File
-                    </button>
+                  <div
+                    className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-blue-400 transition-colors cursor-pointer"
+                    onClick={() =>
+                      !selectedFile && fileInputRef.current?.click()
+                    }
+                  >
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                    {selectedFile ? (
+                      <div className="flex flex-col items-center gap-3">
+                        <img
+                          src={URL.createObjectURL(selectedFile)}
+                          alt="Preview"
+                          className="max-h-40 rounded-lg object-contain"
+                        />
+                        <p className="text-sm font-medium text-slate-700">
+                          {selectedFile.name}
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          {(selectedFile.size / 1024).toFixed(1)} KB
+                        </p>
+                        <button
+                          type="button"
+                          className="btn-secondary text-sm text-red-500 border-red-200 hover:bg-red-50"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveFile();
+                          }}
+                        >
+                          Remove File
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                        <p className="text-slate-600 mb-2">
+                          Click to upload an image of the ingredient list
+                        </p>
+                        <p className="text-sm text-slate-400 mb-4">
+                          Accepts PNG, JPG, WEBP, GIF images only
+                        </p>
+                        <button
+                          type="button"
+                          className="btn-secondary text-sm"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          Choose Image
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
 
@@ -204,7 +296,11 @@ const UserDashboard = () => {
                 <button
                   className="btn-primary w-full mt-8"
                   onClick={handleAnalyze}
-                  disabled={isAnalyzing || !ingredientInput.trim()}
+                  disabled={
+                    isAnalyzing ||
+                    (inputType === "text" && !ingredientInput.trim()) ||
+                    (inputType === "image" && !selectedFile)
+                  }
                 >
                   {isAnalyzing ? (
                     <>
