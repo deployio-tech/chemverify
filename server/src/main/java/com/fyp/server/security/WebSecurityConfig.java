@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -12,7 +13,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+
 
 @Configuration
 @RequiredArgsConstructor
@@ -22,29 +25,27 @@ public class WebSecurityConfig {
 
     private final jwtAuthFilter jwtAuthFilter;
     private final HandlerExceptionResolver handlerExceptionResolver;
-
+    private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
-        httpSecurity
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sessionConfig ->
-                        sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/user/**",
+                                "/api/auth/otp/**",
+                                "/api/auth/login",
+                                "/api/auth/signup").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/dermatologist/**").hasRole("DERMATOLOGIST")
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "DERMATOLOGIST", "ADMIN")
-                        .requestMatchers("/api/users/**").hasAnyRole("USER", "DERMATOLOGIST", "ADMIN")
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exceptionHandlingConfigurer ->
-                        exceptionHandlingConfigurer.accessDeniedHandler((request, response, accessDeniedException) -> {
-                            handlerExceptionResolver.resolveException(request, response, null, accessDeniedException);
-                        }));
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-//                .formLogin();
-        return httpSecurity.build();
+        return http.build();
     }
 }
