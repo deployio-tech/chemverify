@@ -8,4 +8,7 @@ public class RagRequestDTO {
     public String jwtToken;
     public String Id;
     public String role;
+    private String imageUrl;
+    private String skinType;
+    private String[] ingredients;
 }
