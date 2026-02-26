@@ -14,6 +14,9 @@ import {
   History,
 } from "lucide-react";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+
 const UserDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"analyze" | "history">("analyze");
@@ -22,6 +25,8 @@ const UserDashboard = () => {
   const [skinType, setSkinType] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const skinTypes = [
@@ -55,6 +60,10 @@ const UserDashboard = () => {
     if (inputType === "image" && !selectedFile) return;
 
     setIsAnalyzing(true);
+    setAnalysisError(null);
+    setAnalysisResult(null);
+
+    const token = localStorage.getItem("token");
 
     try {
       if (inputType === "text") {
@@ -66,24 +75,59 @@ const UserDashboard = () => {
 
         console.log("Ingredients array:", ingredientsArray);
 
-        // TODO: Replace with actual API call
+        // TODO: Replace with actual text-based API call
         // Example: await fetch('/api/analyze', { method: 'POST', body: JSON.stringify({ ingredients: ingredientsArray, skinType }) })
       } else {
-        // Image upload flow
+        // Image upload flow — send to /api/chemicalIngredients/
         const formData = new FormData();
-        formData.append("image", selectedFile!);
-        if (skinType) formData.append("skinType", skinType);
+        formData.append("file", selectedFile!);
 
-        console.log("Uploading image:", selectedFile!.name);
+        // Send the DTO as a JSON blob part named "data"
+        const dtoPayload = {
+          skinType: skinType || null,
+          ingredients: [],
+        };
+        formData.append(
+          "data",
+          new Blob([JSON.stringify(dtoPayload)], {
+            type: "application/json",
+          }),
+        );
 
-        // TODO: Replace with actual API call
-        // Example: await fetch('/api/analyze-image', { method: 'POST', body: formData })
+        console.log(
+          "Uploading image:",
+          selectedFile!.name,
+          "with payload:",
+          dtoPayload,
+        );
+
+        const response = await fetch(
+          `${API_BASE_URL}/api/chemicalIngredients/`,
+          {
+            method: "POST",
+            headers: {
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: formData,
+          },
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(
+            errorText || `Request failed with status ${response.status}`,
+          );
+        }
+
+        const data = await response.json();
+        setAnalysisResult(data);
+        console.log("Analysis result:", data);
       }
-
-      // Simulate API call delay for now
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-    } catch (error) {
+    } catch (error: any) {
       console.error("Analysis failed:", error);
+      setAnalysisError(
+        error.message || "Something went wrong. Please try again.",
+      );
     } finally {
       setIsAnalyzing(false);
     }
@@ -314,6 +358,36 @@ const UserDashboard = () => {
                     </>
                   )}
                 </button>
+
+                {/* Error Display */}
+                {analysisError && (
+                  <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-red-800">
+                        Analysis Failed
+                      </p>
+                      <p className="text-sm text-red-600 mt-1">
+                        {analysisError}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Result Display */}
+                {analysisResult && (
+                  <div className="mt-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
+                    <div className="w-full">
+                      <p className="text-sm font-medium text-emerald-800">
+                        Analysis Complete
+                      </p>
+                      <pre className="mt-2 text-sm text-emerald-700 bg-emerald-100 rounded-lg p-3 overflow-x-auto whitespace-pre-wrap">
+                        {JSON.stringify(analysisResult, null, 2)}
+                      </pre>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
