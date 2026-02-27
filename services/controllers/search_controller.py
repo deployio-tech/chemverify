@@ -13,16 +13,23 @@ collection = db["vectors"]
 def search():
     data = request.json
 
-    if not data or "query" not in data:
-        return jsonify({"error": "query is required"}), 400
+    if not data or "ingredients" not in data or "skinType" not in data:
+        return jsonify({"error": "ingredients and skinType are required"}), 400
 
-    query_embedding = get_embedding(data["query"])
+    ingredients = data["ingredients"]  # array of ingredient strings
+    skin_type = data["skinType"]
+
+    # Join ingredients into a single string for embedding generation
+    ingredients_text = ", ".join(ingredients)
+    print("Ingredients text for embedding:", ingredients_text)
+
+    query_embedding = get_embedding(ingredients_text)
 
     try:
-        print("query embedding", query_embedding)
+        print("query embedding generated")
         results = vector_search(collection, query_embedding)
         print("vector searched with results", results)
-        response = generate_response(results, data["query"])    
+        response = generate_response(results, ingredients_text, skin_type)
         return jsonify({
             "response": response
         }), 200

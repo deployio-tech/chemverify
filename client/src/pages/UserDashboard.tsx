@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { sileo } from "sileo";
 import {
   Search,
   Upload,
@@ -12,10 +13,66 @@ import {
   User,
   FileText,
   History,
+  Star,
+  AlertTriangle,
+  Lightbulb,
+  ShieldCheck,
+  Eye,
 } from "lucide-react";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+
+// Helper to get safety badge styles
+const getSafetyBadge = (level: string) => {
+  switch (level) {
+    case "safe":
+      return {
+        bg: "bg-emerald-50",
+        text: "text-emerald-700",
+        border: "border-emerald-200",
+        icon: <CheckCircle className="w-4 h-4 text-emerald-500" />,
+        label: "Safe",
+      };
+    case "caution":
+      return {
+        bg: "bg-amber-50",
+        text: "text-amber-700",
+        border: "border-amber-200",
+        icon: <AlertTriangle className="w-4 h-4 text-amber-500" />,
+        label: "Caution",
+      };
+    case "avoid":
+      return {
+        bg: "bg-red-50",
+        text: "text-red-700",
+        border: "border-red-200",
+        icon: <Shield className="w-4 h-4 text-red-500" />,
+        label: "Avoid",
+      };
+    default:
+      return {
+        bg: "bg-slate-50",
+        text: "text-slate-700",
+        border: "border-slate-200",
+        icon: <Eye className="w-4 h-4 text-slate-500" />,
+        label: level,
+      };
+  }
+};
+
+// Helper to get safety score color
+const getScoreColor = (score: number) => {
+  if (score >= 8) return "text-emerald-600";
+  if (score >= 5) return "text-amber-600";
+  return "text-red-600";
+};
+
+const getScoreBg = (score: number) => {
+  if (score >= 8) return "bg-emerald-50 border-emerald-200";
+  if (score >= 5) return "bg-amber-50 border-amber-200";
+  return "bg-red-50 border-red-200";
+};
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -63,6 +120,8 @@ const UserDashboard = () => {
     setAnalysisError(null);
     setAnalysisResult(null);
 
+    
+
     const token = localStorage.getItem("token");
 
     try {
@@ -78,7 +137,7 @@ const UserDashboard = () => {
         // TODO: Replace with actual text-based API call
         // Example: await fetch('/api/analyze', { method: 'POST', body: JSON.stringify({ ingredients: ingredientsArray, skinType }) })
       } else {
-        // Image upload flow — send hardcoded ingredients + skin type to /api/chemicalIngredients/
+        // Image upload flow — send hardcoded ingredients + skin type
         const hardcodedIngredients =
           "Aqua, Calendula officinalis {Flower} Extract, Betaine, Sodium PCA, Sodium Lactate, PCA, Serine, Alanine, Glycine, Glutamic Acid, Lysine HCI, Threonine, Arginine, Proline, Glycerin, Diheptyl Succinate (and) Capryloyl Glycerin/Sebacic Acid Copolymer, Aloe barbadensis (Aloe Vera) Extract, Triethanolamine, Phenoxyethanol (and) Ethylhexylglycerin, Acrylates/C10-30 Alkyl Acrylate Crosspolymer, Sodium Pyrrolidone Carboxylate, Sodium Gluconate, Panthenol";
 
@@ -94,17 +153,14 @@ const UserDashboard = () => {
 
         console.log("Sending hardcoded ingredients with skin type:", payload);
 
-        const response = await fetch(
-          `${API_BASE_URL}/ask`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify(payload),
+        const response = await fetch(`${API_BASE_URL}/ask`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
-        );
+          body: JSON.stringify(payload),
+        });
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -120,17 +176,217 @@ const UserDashboard = () => {
         } catch {
           data = { message: text };
         }
-        setAnalysisResult(data);
-        console.log("Analysis result:", data);
+        // The response has a "response" key containing the clean data
+        const result = data.response || data;
+        setAnalysisResult(result);
+        console.log("Analysis result:", result);
+
+        sileo.success({
+          title: "Analysis Complete!",
+          description: `Scroll to Check analysis`,
+        });
+        
       }
     } catch (error: any) {
       console.error("Analysis failed:", error);
       setAnalysisError(
         error.message || "Something went wrong. Please try again.",
       );
+      sileo.error({
+        title: "Analysis Failed",
+        description: error.message || "Something went wrong. Please try again.",
+      });
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  // Render the beautiful analysis results
+  const renderAnalysisResult = () => {
+    if (!analysisResult) return null;
+
+    const {
+      skin_type,
+      safety_score,
+      overall_rating,
+      ingredients,
+      best_ingredients,
+      ingredients_to_watch,
+      allergen_warnings,
+      product_summary,
+      recommendations,
+    } = analysisResult;
+
+    return (
+      <div className="mt-8 space-y-6 animate-in fade-in duration-500">
+        {/* Header Card — Score + Rating */}
+        <div
+          className={`rounded-2xl border p-6 ${getScoreBg(safety_score || 0)}`}
+        >
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-4">
+              <div
+                className={`text-5xl font-bold ${getScoreColor(safety_score || 0)}`}
+              >
+                {safety_score || "?"}
+                <span className="text-lg font-normal text-slate-400">/10</span>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">
+                  {overall_rating || "Analysis Complete"}
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Skin Type:{" "}
+                  <span className="font-medium capitalize">
+                    {skin_type || "Not specified"}
+                  </span>
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <ShieldCheck
+                className={`w-8 h-8 ${getScoreColor(safety_score || 0)}`}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Product Summary */}
+        {product_summary && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-5">
+            <h4 className="text-sm font-semibold text-slate-900 mb-2 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-blue-500" />
+              Product Summary
+            </h4>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              {product_summary}
+            </p>
+          </div>
+        )}
+
+        {/* Best Ingredients & Watch List */}
+        <div className="grid sm:grid-cols-2 gap-4">
+          {best_ingredients && best_ingredients.length > 0 && (
+            <div className="bg-emerald-50 rounded-2xl border border-emerald-200 p-5">
+              <h4 className="text-sm font-semibold text-emerald-800 mb-3 flex items-center gap-2">
+                <Star className="w-4 h-4 text-emerald-500" />
+                Best Ingredients
+              </h4>
+              <ul className="space-y-2">
+                {best_ingredients.map((name: string, i: number) => (
+                  <li
+                    key={i}
+                    className="flex items-center gap-2 text-sm text-emerald-700"
+                  >
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    <span className="capitalize">{name}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {ingredients_to_watch && ingredients_to_watch.length > 0 && (
+            <div className="bg-amber-50 rounded-2xl border border-amber-200 p-5">
+              <h4 className="text-sm font-semibold text-amber-800 mb-3 flex items-center gap-2">
+                <Eye className="w-4 h-4 text-amber-500" />
+                Ingredients to Watch
+              </h4>
+              <ul className="space-y-2">
+                {ingredients_to_watch.map((name: string, i: number) => (
+                  <li
+                    key={i}
+                    className="flex items-center gap-2 text-sm text-amber-700"
+                  >
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <span className="capitalize">{name}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+
+        {/* Allergen Warnings */}
+        {allergen_warnings && allergen_warnings.length > 0 && (
+          <div className="bg-red-50 rounded-2xl border border-red-200 p-5">
+            <h4 className="text-sm font-semibold text-red-800 mb-3 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-red-500" />
+              Allergen Warnings
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {allergen_warnings.map((name: string, i: number) => (
+                <span
+                  key={i}
+                  className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium capitalize"
+                >
+                  {name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Full Ingredients List */}
+        {ingredients && ingredients.length > 0 && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-5">
+            <h4 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
+              <FlaskConical className="w-4 h-4 text-blue-500" />
+              Ingredients Analysis ({ingredients.length} ingredients)
+            </h4>
+            <div className="space-y-3">
+              {ingredients.map((ing: any, i: number) => {
+                const badge = getSafetyBadge(ing.safety_level);
+                return (
+                  <div
+                    key={i}
+                    className={`flex items-start justify-between gap-3 p-3 rounded-xl border ${badge.border} ${badge.bg} transition-all hover:shadow-sm`}
+                  >
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className="mt-0.5 shrink-0">{badge.icon}</div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-slate-900 capitalize">
+                          {ing.name}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          {ing.benefit}
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-xs font-medium shrink-0 ${badge.text} ${badge.bg} border ${badge.border}`}
+                    >
+                      {badge.label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Recommendations */}
+        {recommendations && recommendations.length > 0 && (
+          <div className="bg-blue-50 rounded-2xl border border-blue-200 p-5">
+            <h4 className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+              <Lightbulb className="w-4 h-4 text-blue-500" />
+              Recommendations
+            </h4>
+            <ul className="space-y-2">
+              {recommendations.map((rec: string, i: number) => (
+                <li
+                  key={i}
+                  className="flex items-start gap-2 text-sm text-blue-700"
+                >
+                  <span className="mt-1 w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                  {rec}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -315,7 +571,7 @@ const UserDashboard = () => {
                 {/* Skin Type Selection */}
                 <div className="mt-6">
                   <label className="block text-sm font-medium text-slate-700 mb-2">
-                    Your Skin Type (Optional)
+                    Your Skin Type
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {skinTypes.map((type) => (
@@ -374,20 +630,8 @@ const UserDashboard = () => {
                   </div>
                 )}
 
-                {/* Result Display */}
-                {analysisResult && (
-                  <div className="mt-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
-                    <div className="w-full">
-                      <p className="text-sm font-medium text-emerald-800">
-                        Analysis Complete
-                      </p>
-                      <pre className="mt-2 text-sm text-emerald-700 bg-emerald-100 rounded-lg p-3 overflow-x-auto whitespace-pre-wrap">
-                        {JSON.stringify(analysisResult, null, 2)}
-                      </pre>
-                    </div>
-                  </div>
-                )}
+                {/* Beautiful Result Display */}
+                {renderAnalysisResult()}
               </div>
             </div>
 
