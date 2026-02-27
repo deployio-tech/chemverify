@@ -78,37 +78,31 @@ const UserDashboard = () => {
         // TODO: Replace with actual text-based API call
         // Example: await fetch('/api/analyze', { method: 'POST', body: JSON.stringify({ ingredients: ingredientsArray, skinType }) })
       } else {
-        // Image upload flow — send to /api/chemicalIngredients/
-        const formData = new FormData();
-        formData.append("file", selectedFile!);
+        // Image upload flow — send hardcoded ingredients + skin type to /api/chemicalIngredients/
+        const hardcodedIngredients =
+          "Aqua, Calendula officinalis {Flower} Extract, Betaine, Sodium PCA, Sodium Lactate, PCA, Serine, Alanine, Glycine, Glutamic Acid, Lysine HCI, Threonine, Arginine, Proline, Glycerin, Diheptyl Succinate (and) Capryloyl Glycerin/Sebacic Acid Copolymer, Aloe barbadensis (Aloe Vera) Extract, Triethanolamine, Phenoxyethanol (and) Ethylhexylglycerin, Acrylates/C10-30 Alkyl Acrylate Crosspolymer, Sodium Pyrrolidone Carboxylate, Sodium Gluconate, Panthenol";
 
-        // Send the DTO as a JSON blob part named "data"
-        const dtoPayload = {
+        const ingredientsArray = hardcodedIngredients
+          .split(/,/)
+          .map((item) => item.trim().toLowerCase())
+          .filter((item) => item.length > 0);
+
+        const payload = {
           skinType: skinType || null,
-          ingredients: [],
+          ingredients: ingredientsArray,
         };
-        formData.append(
-          "data",
-          new Blob([JSON.stringify(dtoPayload)], {
-            type: "application/json",
-          }),
-        );
 
-        console.log(
-          "Uploading image:",
-          selectedFile!.name,
-          "with payload:",
-          dtoPayload,
-        );
+        console.log("Sending hardcoded ingredients with skin type:", payload);
 
         const response = await fetch(
-          `${API_BASE_URL}/api/chemicalIngredients/`,
+          `${API_BASE_URL}/ask`,
           {
             method: "POST",
             headers: {
+              "Content-Type": "application/json",
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
-            body: formData,
+            body: JSON.stringify(payload),
           },
         );
 
@@ -118,8 +112,14 @@ const UserDashboard = () => {
             errorText || `Request failed with status ${response.status}`,
           );
         }
-
-        const data = await response.json();
+        console.log(response);
+        const text = await response.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = { message: text };
+        }
         setAnalysisResult(data);
         console.log("Analysis result:", data);
       }

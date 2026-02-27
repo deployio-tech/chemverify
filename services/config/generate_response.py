@@ -17,39 +17,48 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 # }
 def generate_response(results, query):
     prompt = f"""
-You are a chemical dermatologist with expertise in skincare ingredients and cosmetic chemistry.
+You are a certified chemical dermatologist and cosmetic chemist specializing in skincare product safety and ingredient analysis.
 
-Using the following context, identify the chemical compounds or active ingredients that can help resolve the given skin issue.
+You have been given a list of product ingredients and the user's skin type. Your job is to verify whether these ingredients are safe, suitable, and beneficial for the specified skin type.
 
-Context:
+Product Ingredients:
 {results}
 
-Skin Issue: {query}
+Skin Type: {query}
 
 Task:
-Extract the relevant compounds/ingredients effective for the skin condition.
-For each compound:
-- Provide the actual compound name (e.g., "Salicylic Acid", "Niacinamide", "Retinol")
-- Provide a one-line explanation of why it is used
+Analyze the product ingredients for the given skin type.
+For each ingredient:
+- Determine if it is beneficial, neutral, or potentially harmful for the specified skin type
+- Provide a one-line explanation of its effect on this skin type
 
 Return the response strictly in the following JSON format and nothing else. Replace the example values with actual data:
 
 Example response format:
 {{
-  "skin_issue": "acne",
-  "recommended_compounds": [
+  "skin_type": "oily",
+  "product_verdict": "Mostly Safe",
+  "total_ingredients_analyzed": 5,
+  "beneficial_ingredients": [
     {{
-      "compound_name": "Salicylic Acid",
-      "reason": "A beta-hydroxy acid that exfoliates and unclogs pores to reduce acne breakouts."
+      "ingredient_name": "Niacinamide",
+      "benefit": "Regulates sebum production and minimizes pore appearance, ideal for oily skin."
     }},
     {{
-      "compound_name": "Benzoyl Peroxide",
-      "reason": "An antibacterial agent that kills acne-causing bacteria and reduces inflammation."
+      "ingredient_name": "Hyaluronic Acid",
+      "benefit": "Provides lightweight hydration without adding oiliness to the skin."
     }}
-  ]
+  ],
+  "harmful_or_unsuitable_ingredients": [
+    {{
+      "ingredient_name": "Coconut Oil",
+      "concern": "Highly comedogenic and can clog pores, worsening oily and acne-prone skin."
+    }}
+  ],
+  "summary": "This product contains mostly beneficial ingredients for oily skin, but Coconut Oil may cause breakouts. Use with caution."
 }}
 
-Now provide the actual response for the given skin issue "{query}" using the context provided above:
+Now provide the actual verification response for skin type "{query}" using the product ingredients listed above:
 """
     return ask_llm(prompt)
 
@@ -57,11 +66,11 @@ def ask_llm(prompt):
     completion = client.chat.completions.create(
         model="openai/gpt-oss-20b",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "system", "content": "You are a certified dermatologist and cosmetic chemist who verifies skincare product ingredients for safety and suitability."},
             {"role": "user", "content": prompt}
         ],
         temperature=0.3,
-        max_tokens=300
+        max_tokens=1024
     )
     return completion.choices[0].message.content
 
