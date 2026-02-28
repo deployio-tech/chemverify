@@ -22,7 +22,7 @@ const UserLogin = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+
   const [signupSuccess, setSignupSuccess] = useState(false);
 
   // Check if redirected from signup
@@ -39,10 +39,9 @@ const UserLogin = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
 
     if (!email || !password) {
-      setError("Please fill in all fields");
+      sileo.error({ title: "Please fill in all fields" });
       return;
     }
 
@@ -77,7 +76,11 @@ const UserLogin = () => {
       sileo.success({ title: "Login successful!" });
       navigate("/dashboard/user");
     } catch (err: any) {
-      setError(err.message || "Login failed. Please check your credentials.");
+      sileo.error({
+        title: "Authentication failed",
+        description:
+          err.message || "Please check your credentials and try again.",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -185,13 +188,6 @@ const UserLogin = () => {
                 </button>
               </div>
             </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-                {error}
-              </div>
-            )}
 
             {/* Remember & Forgot */}
             <div className="flex items-center justify-between mb-6">

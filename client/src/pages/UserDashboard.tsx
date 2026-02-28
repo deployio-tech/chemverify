@@ -120,8 +120,6 @@ const UserDashboard = () => {
     setAnalysisError(null);
     setAnalysisResult(null);
 
-    
-
     const token = localStorage.getItem("token");
 
     try {
@@ -137,38 +135,80 @@ const UserDashboard = () => {
         // TODO: Replace with actual text-based API call
         // Example: await fetch('/api/analyze', { method: 'POST', body: JSON.stringify({ ingredients: ingredientsArray, skinType }) })
       } else {
-        // Image upload flow — send hardcoded ingredients + skin type
-        const hardcodedIngredients =
-          "Aqua, Calendula officinalis {Flower} Extract, Betaine, Sodium PCA, Sodium Lactate, PCA, Serine, Alanine, Glycine, Glutamic Acid, Lysine HCI, Threonine, Arginine, Proline, Glycerin, Diheptyl Succinate (and) Capryloyl Glycerin/Sebacic Acid Copolymer, Aloe barbadensis (Aloe Vera) Extract, Triethanolamine, Phenoxyethanol (and) Ethylhexylglycerin, Acrylates/C10-30 Alkyl Acrylate Crosspolymer, Sodium Pyrrolidone Carboxylate, Sodium Gluconate, Panthenol";
+        // ─────────────────────────────────────────────────────────────
+        // IMAGE UPLOAD FLOW
+        // Sends the selected image file + skinType to the Spring Boot
+        // backend at http://localhost:8080/api/chemicalIngredients/
+        // ─────────────────────────────────────────────────────────────
 
-        const ingredientsArray = hardcodedIngredients
-          .split(/,/)
-          .map((item) => item.trim().toLowerCase())
-          .filter((item) => item.length > 0);
+        // Step 1: Create a FormData object to send multipart/form-data.
+        //         The Spring Boot controller expects two @RequestPart params:
+        //           - "file"  → the image (MultipartFile)
+        //           - "data"  → JSON body with { skinType, ingredients }
+        const formData = new FormData();
 
-        const payload = {
-          skinType: skinType || null,
-          ingredients: ingredientsArray,
+        // Step 2: Append the selected image file under the key "file".
+        //         This maps to @RequestPart("file") MultipartFile file
+        formData.append("file", selectedFile!);
+
+        // Step 3: Build the JSON payload matching userChemRequestDTO.
+        //         - skinType:    the user's selected skin type (e.g. "Oily")
+        //         - ingredients: empty array since the backend extracts
+        //                        ingredients from the image via OCR (Lambda)
+        const requestData = {
+          skinType: skinType || "Normal",
+          ingredients: [] as string[],
         };
 
-        console.log("Sending hardcoded ingredients with skin type:", payload);
+        // Step 4: Append the JSON payload as a Blob with type "application/json".
+        //         This is required because @RequestPart("data") expects JSON,
+        //         and FormData needs an explicit content type for non-file parts.
+        formData.append(
+          "data",
+          new Blob([JSON.stringify(requestData)], { type: "application/json" }),
+        );
 
-        const response = await fetch(`${API_BASE_URL}/ask`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          },
-          body: JSON.stringify(payload),
+        console.log("Sending image + skinType to Spring Boot backend:", {
+          fileName: selectedFile!.name,
+          fileSize: selectedFile!.size,
+          skinType: requestData.skinType,
         });
 
+        // Step 5: Send the FormData to the Spring Boot API.
+        //         IMPORTANT: Do NOT set "Content-Type" header manually —
+        //         the browser auto-sets it to "multipart/form-data" with
+        //         the correct boundary when using FormData.
+        const SPRING_BOOT_URL = "http://localhost:8080";
+
+        const response = await fetch(
+          `${SPRING_BOOT_URL}/api/chemicalIngredients/`,
+          {
+            method: "POST",
+            headers: {
+              // Authorization header if the user is logged in
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: formData,
+          },
+        );
+
+        // Step 6: Handle the response from the backend
         if (!response.ok) {
           const errorText = await response.text();
           throw new Error(
             errorText || `Request failed with status ${response.status}`,
           );
         }
-        console.log(response);
+
+        // Step 7: Parse the response JSON.
+        //         The backend returns:
+        //         {
+        //           message: "Analysis completed successfully",
+        //           id: "<document_id>",
+        //           status: "COMPLETED",
+        //           extractedText: "<OCR text from Lambda>",
+        //           ragResponse: "<LLM analysis result>"
+        //         }
         const text = await response.text();
         let data;
         try {
@@ -176,16 +216,35 @@ const UserDashboard = () => {
         } catch {
           data = { message: text };
         }
-        // The response has a "response" key containing the clean data
-        const result = data.response || data;
+
+        // Step 8: Extract the ragResponse and parse it.
+        //         ragResponse from Spring Boot is a JSON *string* like:
+        //         "{\"response\": { ...analysis data... }}"
+        //         We need to: (a) parse the string → object,
+        //                     (b) extract the inner .response key
+        let result = data.ragResponse || data.response || data;
+
+        // If ragResponse is a string, parse it into an object
+        if (typeof result === "string") {
+          try {
+            result = JSON.parse(result);
+          } catch {
+            // If parsing fails, keep as-is
+          }
+        }
+
+        // Unwrap the inner "response" key if present (Flask wraps it)
+        if (result && typeof result === "object" && result.response) {
+          result = result.response;
+        }
+
         setAnalysisResult(result);
         console.log("Analysis result:", result);
 
         sileo.success({
           title: "Analysis Complete!",
-          description: `Scroll to Check analysis`,
+          description: "Scroll down to check the analysis results.",
         });
-        
       }
     } catch (error: any) {
       console.error("Analysis failed:", error);

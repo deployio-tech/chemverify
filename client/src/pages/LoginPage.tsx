@@ -38,9 +38,6 @@ const LoginPage = () => {
           <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
             <UserSearch className="w-7 h-7 text-white" />
           </div>
-          <span className="text-2xl font-bold text-slate-900">
-            Cherkmal Users
-          </span>
         </div>
 
         {/* Title */}
