@@ -1,4 +1,5 @@
 package com.fyp.server.service;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class imageService {
     private final S3Client s3Client;
 
@@ -20,7 +22,7 @@ public class imageService {
     }
 
     public String uploadFile(MultipartFile file) throws IOException {
-
+        log.info("inside the upload file");
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
