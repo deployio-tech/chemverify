@@ -3,8 +3,12 @@ import com.fyp.server.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.validation.constraints.Null;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.security.core.Authentication;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -22,8 +26,9 @@ public class AuthUtil {
 
     public String generateAccessToken(User user) {
         return Jwts.builder()
-                .setSubject(user.getName())
+                .setSubject(user.getEmail())
                 .claim("userId", user.getId())
+                .claim("roles", user.getRoles().stream().map(r -> r.getAuthority()).toList())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 10))
                 .signWith(getSecretKey())
@@ -38,6 +43,16 @@ public class AuthUtil {
                 .getBody();
         return claims.getSubject();
     }
+    public String getCurrentUserId(String token){
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
 
+        assert authentication != null;
+        User userDetails =
+                (User) authentication.getPrincipal();
+
+        assert userDetails != null;
+        return userDetails.getUserId();
+    }
 
 }
