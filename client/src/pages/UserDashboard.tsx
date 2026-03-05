@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { sileo } from "sileo";
 import {
@@ -18,6 +18,11 @@ import {
   Lightbulb,
   ShieldCheck,
   Eye,
+  ArrowLeft,
+  Calendar,
+  ChevronRight,
+  Clock,
+  Package,
 } from "lucide-react";
 
 // const API_BASE_URL =
@@ -74,6 +79,233 @@ const getScoreBg = (score: number) => {
   return "bg-red-50 border-red-200";
 };
 
+const getScoreBorderLeft = (score: number) => {
+  if (score >= 8) return "border-l-emerald-500";
+  if (score >= 5) return "border-l-amber-500";
+  return "border-l-red-500";
+};
+
+// ── Sample Analysis History Data ──────────────────────────────────────────
+const SAMPLE_HISTORY = [
+  {
+    id: "h1",
+    productName: "CeraVe Moisturizing Cream",
+    date: "2026-03-05T14:22:00",
+    inputType: "image" as const,
+    result: {
+      skin_type: "dry",
+      safety_score: 9,
+      overall_rating: "Excellent — Very Safe",
+      product_summary:
+        "A dermatologist-recommended moisturizer featuring ceramides and hyaluronic acid. Excellent for restoring the skin barrier with minimal irritation risk.",
+      best_ingredients: [
+        "ceramide np",
+        "hyaluronic acid",
+        "niacinamide",
+        "cholesterol",
+      ],
+      ingredients_to_watch: ["phenoxyethanol"],
+      allergen_warnings: [],
+      ingredients: [
+        {
+          name: "ceramide np",
+          benefit: "Restores skin barrier & retains moisture",
+          safety_level: "safe",
+        },
+        {
+          name: "hyaluronic acid",
+          benefit: "Deep hydration & plumping",
+          safety_level: "safe",
+        },
+        {
+          name: "niacinamide",
+          benefit: "Reduces redness & evens skin tone",
+          safety_level: "safe",
+        },
+        {
+          name: "cholesterol",
+          benefit: "Strengthens skin lipid barrier",
+          safety_level: "safe",
+        },
+        {
+          name: "phenoxyethanol",
+          benefit: "Preservative to prevent bacterial growth",
+          safety_level: "caution",
+        },
+      ],
+      recommendations: [
+        "Great choice for dry and sensitive skin types.",
+        "Apply on damp skin to lock in hydration.",
+        "Pair with a gentle cleanser for best results.",
+      ],
+    },
+  },
+  {
+    id: "h2",
+    productName: "The Ordinary Niacinamide 10% + Zinc 1%",
+    date: "2026-03-04T09:15:00",
+    inputType: "text" as const,
+    result: {
+      skin_type: "oily",
+      safety_score: 8,
+      overall_rating: "Very Good — Safe for Most",
+      product_summary:
+        "A high-strength vitamin and mineral formula that targets blemishes and congestion. Suitable for oily and acne-prone skin.",
+      best_ingredients: ["niacinamide", "zinc pca"],
+      ingredients_to_watch: ["dimethyl isosorbide"],
+      allergen_warnings: [],
+      ingredients: [
+        {
+          name: "niacinamide",
+          benefit: "Controls sebum & minimizes pores",
+          safety_level: "safe",
+        },
+        {
+          name: "zinc pca",
+          benefit: "Antibacterial & oil control",
+          safety_level: "safe",
+        },
+        {
+          name: "dimethyl isosorbide",
+          benefit: "Penetration enhancer",
+          safety_level: "caution",
+        },
+      ],
+      recommendations: [
+        "Use in the AM routine before moisturizer.",
+        "Avoid combining with Vitamin C serums in the same routine.",
+      ],
+    },
+  },
+  {
+    id: "h3",
+    productName: "Neutrogena Ultra Sheer Sunscreen SPF 70",
+    date: "2026-03-02T16:45:00",
+    inputType: "image" as const,
+    result: {
+      skin_type: "combination",
+      safety_score: 6,
+      overall_rating: "Moderate — Some Concerns",
+      product_summary:
+        "A lightweight chemical sunscreen with broad-spectrum protection. Contains effective UV filters but some ingredients may cause sensitivity.",
+      best_ingredients: ["vitamin e", "glycerin"],
+      ingredients_to_watch: ["oxybenzone", "octinoxate", "fragrance"],
+      allergen_warnings: ["oxybenzone", "fragrance"],
+      ingredients: [
+        {
+          name: "avobenzone",
+          benefit: "UVA protection",
+          safety_level: "caution",
+        },
+        {
+          name: "oxybenzone",
+          benefit: "Broad-spectrum UV filter",
+          safety_level: "avoid",
+        },
+        {
+          name: "octinoxate",
+          benefit: "UVB protection",
+          safety_level: "caution",
+        },
+        {
+          name: "vitamin e",
+          benefit: "Antioxidant protection",
+          safety_level: "safe",
+        },
+        { name: "glycerin", benefit: "Hydration", safety_level: "safe" },
+        { name: "fragrance", benefit: "Scent", safety_level: "avoid" },
+      ],
+      recommendations: [
+        "Consider switching to a mineral sunscreen with zinc oxide.",
+        "If you have sensitive skin, oxybenzone may cause irritation.",
+        "Reapply every 2 hours for effective protection.",
+      ],
+    },
+  },
+  {
+    id: "h4",
+    productName: "La Roche-Posay Toleriane Cleanser",
+    date: "2026-02-28T11:30:00",
+    inputType: "text" as const,
+    result: {
+      skin_type: "sensitive",
+      safety_score: 9,
+      overall_rating: "Excellent — Gentle Formula",
+      product_summary:
+        "A gentle, soap-free cleanser formulated with prebiotic thermal water and ceramide-3 for sensitive skin.",
+      best_ingredients: [
+        "ceramide-3",
+        "niacinamide",
+        "glycerin",
+        "thermal water",
+      ],
+      ingredients_to_watch: [],
+      allergen_warnings: [],
+      ingredients: [
+        { name: "ceramide-3", benefit: "Barrier repair", safety_level: "safe" },
+        {
+          name: "niacinamide",
+          benefit: "Soothes & strengthens",
+          safety_level: "safe",
+        },
+        {
+          name: "glycerin",
+          benefit: "Moisture retention",
+          safety_level: "safe",
+        },
+        {
+          name: "thermal water",
+          benefit: "Mineral-rich soothing",
+          safety_level: "safe",
+        },
+      ],
+      recommendations: [
+        "Perfect for double cleansing routine.",
+        "Safe for twice-daily use.",
+      ],
+    },
+  },
+  {
+    id: "h5",
+    productName: "Garnier Skin Active Micellar Water",
+    date: "2026-02-25T20:10:00",
+    inputType: "image" as const,
+    result: {
+      skin_type: "normal",
+      safety_score: 7,
+      overall_rating: "Good — Generally Safe",
+      product_summary:
+        "A no-rinse micellar cleansing water that removes makeup and impurities. Contains mild surfactants but also synthetic fragrance.",
+      best_ingredients: ["glycerin", "disodium cocoamphodiacetate"],
+      ingredients_to_watch: ["fragrance", "peg-6 caprylic/capric glycerides"],
+      allergen_warnings: ["fragrance"],
+      ingredients: [
+        { name: "glycerin", benefit: "Hydration", safety_level: "safe" },
+        {
+          name: "disodium cocoamphodiacetate",
+          benefit: "Mild surfactant",
+          safety_level: "safe",
+        },
+        {
+          name: "hexylene glycol",
+          benefit: "Solvent & emollient",
+          safety_level: "caution",
+        },
+        { name: "fragrance", benefit: "Scent", safety_level: "avoid" },
+        {
+          name: "peg-6 caprylic/capric glycerides",
+          benefit: "Emulsifier",
+          safety_level: "caution",
+        },
+      ],
+      recommendations: [
+        "For sensitive skin, look for the fragrance-free version.",
+        "Follow up with a proper cleanser for deep cleaning.",
+      ],
+    },
+  },
+];
+
 const UserDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"analyze" | "history">("analyze");
@@ -85,6 +317,14 @@ const UserDashboard = () => {
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(
+    null,
+  );
+
+  const selectedHistory = useMemo(
+    () => SAMPLE_HISTORY.find((h) => h.id === selectedHistoryId) ?? null,
+    [selectedHistoryId],
+  );
 
   const skinTypes = [
     "Normal",
@@ -766,10 +1006,323 @@ const UserDashboard = () => {
         )}
 
         {activeTab === "history" && (
-          <div className="bg-white rounded-2xl border border-slate-200 p-6">
-            <p className="text-slate-500 text-center py-12">
-              No analysis history yet. Start by analyzing your first product!
-            </p>
+          <div>
+            {/* ── Detail View ── */}
+            {selectedHistory ? (
+              <div className="space-y-6">
+                {/* Back button + header */}
+                <button
+                  onClick={() => setSelectedHistoryId(null)}
+                  className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to History
+                </button>
+
+                <div className="bg-white rounded-2xl border border-slate-200 p-6">
+                  <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-900">
+                        {selectedHistory.productName}
+                      </h2>
+                      <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
+                        <span className="inline-flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {new Date(selectedHistory.date).toLocaleDateString(
+                            "en-IN",
+                            {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            },
+                          )}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          {new Date(selectedHistory.date).toLocaleTimeString(
+                            "en-IN",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                          )}
+                        </span>
+                        <span className="inline-flex items-center gap-1 capitalize px-2 py-0.5 rounded-full bg-slate-100 text-xs font-medium">
+                          {selectedHistory.inputType === "image" ? (
+                            <>
+                              <Upload className="w-3 h-3" /> Image
+                            </>
+                          ) : (
+                            <>
+                              <FileText className="w-3 h-3" /> Text
+                            </>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Reuse the same beautiful result cards */}
+                  {(() => {
+                    const r = selectedHistory.result;
+                    return (
+                      <div className="space-y-6">
+                        {/* Score header */}
+                        <div
+                          className={`rounded-2xl border p-6 ${getScoreBg(r.safety_score)}`}
+                        >
+                          <div className="flex items-center justify-between flex-wrap gap-4">
+                            <div className="flex items-center gap-4">
+                              <div
+                                className={`text-5xl font-bold ${getScoreColor(r.safety_score)}`}
+                              >
+                                {r.safety_score}
+                                <span className="text-lg font-normal text-slate-400">
+                                  /10
+                                </span>
+                              </div>
+                              <div>
+                                <h3 className="text-lg font-semibold text-slate-900">
+                                  {r.overall_rating}
+                                </h3>
+                                <p className="text-sm text-slate-600">
+                                  Skin Type:{" "}
+                                  <span className="font-medium capitalize">
+                                    {r.skin_type}
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+                            <ShieldCheck
+                              className={`w-8 h-8 ${getScoreColor(r.safety_score)}`}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Summary */}
+                        {r.product_summary && (
+                          <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                            <h4 className="text-sm font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                              <FileText className="w-4 h-4 text-blue-500" />{" "}
+                              Product Summary
+                            </h4>
+                            <p className="text-sm text-slate-600 leading-relaxed">
+                              {r.product_summary}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Best / Watch */}
+                        <div className="grid sm:grid-cols-2 gap-4">
+                          {r.best_ingredients?.length > 0 && (
+                            <div className="bg-emerald-50 rounded-2xl border border-emerald-200 p-5">
+                              <h4 className="text-sm font-semibold text-emerald-800 mb-3 flex items-center gap-2">
+                                <Star className="w-4 h-4 text-emerald-500" />{" "}
+                                Best Ingredients
+                              </h4>
+                              <ul className="space-y-2">
+                                {r.best_ingredients.map(
+                                  (n: string, i: number) => (
+                                    <li
+                                      key={i}
+                                      className="flex items-center gap-2 text-sm text-emerald-700"
+                                    >
+                                      <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                      <span className="capitalize">{n}</span>
+                                    </li>
+                                  ),
+                                )}
+                              </ul>
+                            </div>
+                          )}
+                          {r.ingredients_to_watch?.length > 0 && (
+                            <div className="bg-amber-50 rounded-2xl border border-amber-200 p-5">
+                              <h4 className="text-sm font-semibold text-amber-800 mb-3 flex items-center gap-2">
+                                <Eye className="w-4 h-4 text-amber-500" />{" "}
+                                Ingredients to Watch
+                              </h4>
+                              <ul className="space-y-2">
+                                {r.ingredients_to_watch.map(
+                                  (n: string, i: number) => (
+                                    <li
+                                      key={i}
+                                      className="flex items-center gap-2 text-sm text-amber-700"
+                                    >
+                                      <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                                      <span className="capitalize">{n}</span>
+                                    </li>
+                                  ),
+                                )}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Allergens */}
+                        {r.allergen_warnings?.length > 0 && (
+                          <div className="bg-red-50 rounded-2xl border border-red-200 p-5">
+                            <h4 className="text-sm font-semibold text-red-800 mb-3 flex items-center gap-2">
+                              <AlertCircle className="w-4 h-4 text-red-500" />{" "}
+                              Allergen Warnings
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                              {r.allergen_warnings.map(
+                                (n: string, i: number) => (
+                                  <span
+                                    key={i}
+                                    className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium capitalize"
+                                  >
+                                    {n}
+                                  </span>
+                                ),
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Full ingredients */}
+                        {r.ingredients?.length > 0 && (
+                          <div className="bg-white rounded-2xl border border-slate-200 p-5">
+                            <h4 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                              <FlaskConical className="w-4 h-4 text-blue-500" />{" "}
+                              Ingredients Analysis ({r.ingredients.length})
+                            </h4>
+                            <div className="space-y-3">
+                              {r.ingredients.map((ing: any, i: number) => {
+                                const badge = getSafetyBadge(ing.safety_level);
+                                return (
+                                  <div
+                                    key={i}
+                                    className={`flex items-start justify-between gap-3 p-3 rounded-xl border ${badge.border} ${badge.bg} transition-all hover:shadow-sm`}
+                                  >
+                                    <div className="flex items-start gap-3 min-w-0">
+                                      <div className="mt-0.5 shrink-0">
+                                        {badge.icon}
+                                      </div>
+                                      <div className="min-w-0">
+                                        <p className="text-sm font-medium text-slate-900 capitalize">
+                                          {ing.name}
+                                        </p>
+                                        <p className="text-xs text-slate-500 mt-0.5">
+                                          {ing.benefit}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <span
+                                      className={`px-2.5 py-1 rounded-full text-xs font-medium shrink-0 ${badge.text} ${badge.bg} border ${badge.border}`}
+                                    >
+                                      {badge.label}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Recommendations */}
+                        {r.recommendations?.length > 0 && (
+                          <div className="bg-blue-50 rounded-2xl border border-blue-200 p-5">
+                            <h4 className="text-sm font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                              <Lightbulb className="w-4 h-4 text-blue-500" />{" "}
+                              Recommendations
+                            </h4>
+                            <ul className="space-y-2">
+                              {r.recommendations.map(
+                                (rec: string, i: number) => (
+                                  <li
+                                    key={i}
+                                    className="flex items-start gap-2 text-sm text-blue-700"
+                                  >
+                                    <span className="mt-1 w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                                    {rec}
+                                  </li>
+                                ),
+                              )}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            ) : (
+              /* ── List View ── */
+              <div className="space-y-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    Recent Analyses
+                  </h2>
+                  <span className="text-sm text-slate-500">
+                    {SAMPLE_HISTORY.length} results
+                  </span>
+                </div>
+
+                {SAMPLE_HISTORY.map((item) => {
+                  const scoreColor = getScoreColor(item.result.safety_score);
+                  const scoreBg = getScoreBg(item.result.safety_score);
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setSelectedHistoryId(item.id)}
+                      className={`w-full text-left bg-white rounded-2xl border border-slate-200 border-l-4 ${getScoreBorderLeft(item.result.safety_score)} p-5 hover:border-blue-300 hover:border-l-blue-500 hover:shadow-md transition-all duration-200 group overflow-hidden`}
+                    >
+                      <div className="flex items-center gap-4">
+                        {/* Score circle */}
+                        <div
+                          className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center shrink-0 border ${scoreBg}`}
+                        >
+                          <span
+                            className={`text-xl font-bold leading-none ${scoreColor}`}
+                          >
+                            {item.result.safety_score}
+                          </span>
+                          <span className="text-[10px] text-slate-400">
+                            /10
+                          </span>
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-semibold text-slate-900 truncate group-hover:text-blue-700 transition-colors">
+                            {item.productName}
+                          </h3>
+                          <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-500">
+                            <span className="inline-flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {new Date(item.date).toLocaleDateString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </span>
+                            <span className="inline-flex items-center gap-1 capitalize">
+                              <Package className="w-3 h-3" />
+                              {item.result.skin_type}
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                              {item.inputType === "image" ? (
+                                <Upload className="w-3 h-3" />
+                              ) : (
+                                <FileText className="w-3 h-3" />
+                              )}
+                              {item.inputType}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-400 mt-1 truncate">
+                            {item.result.overall_rating}
+                          </p>
+                        </div>
+
+                        {/* Arrow */}
+                        <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 transition-colors shrink-0" />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>

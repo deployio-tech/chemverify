@@ -42,10 +42,10 @@ const UserProfile = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    fetchProfile();
+    loadProfileFromLocal();
   }, []);
 
-  const fetchProfile = async () => {
+  const loadProfileFromLocal = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -53,19 +53,35 @@ const UserProfile = () => {
         return;
       }
 
-      const response = await fetch("/api/users/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const userId = localStorage.getItem("userId") || "";
+      const role = localStorage.getItem("role") || "USER";
+      let email = localStorage.getItem("email") || "";
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch profile");
+      // Decode JWT payload to extract email (subject) if not in localStorage
+      if (!email) {
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          email = payload.sub || "";
+        } catch {
+          // token decode failed — leave email empty
+        }
       }
 
-      const data = await response.json();
-      setProfile(data);
-      setEditName(data.name);
+      // Derive a display name from email (e.g. john.doe@gmail.com → John Doe)
+      const name = email
+        ? email
+            .split("@")[0]
+            .replace(/[._-]/g, " ")
+            .replace(/\b\w/g, (c) => c.toUpperCase())
+        : "User";
+
+      setProfile({
+        id: userId,
+        name,
+        email,
+        roles: [role],
+      });
+      setEditName(name);
     } catch (err: any) {
       setError(err.message || "Failed to load profile");
     } finally {

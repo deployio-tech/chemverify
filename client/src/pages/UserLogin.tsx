@@ -71,6 +71,7 @@ const UserLogin = () => {
       localStorage.setItem("token", data.jwt);
       localStorage.setItem("userId", data.id);
       localStorage.setItem("role", data.role);
+      localStorage.setItem("email", email);
 
       // Navigate to user dashboard
       sileo.success({ title: "Login successful!" });
