@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { sileo } from "sileo";
 import {
@@ -85,226 +85,17 @@ const getScoreBorderLeft = (score: number) => {
   return "border-l-red-500";
 };
 
-// ── Sample Analysis History Data ──────────────────────────────────────────
-const SAMPLE_HISTORY = [
-  {
-    id: "h1",
-    productName: "CeraVe Moisturizing Cream",
-    date: "2026-03-05T14:22:00",
-    inputType: "image" as const,
-    result: {
-      skin_type: "dry",
-      safety_score: 9,
-      overall_rating: "Excellent — Very Safe",
-      product_summary:
-        "A dermatologist-recommended moisturizer featuring ceramides and hyaluronic acid. Excellent for restoring the skin barrier with minimal irritation risk.",
-      best_ingredients: [
-        "ceramide np",
-        "hyaluronic acid",
-        "niacinamide",
-        "cholesterol",
-      ],
-      ingredients_to_watch: ["phenoxyethanol"],
-      allergen_warnings: [],
-      ingredients: [
-        {
-          name: "ceramide np",
-          benefit: "Restores skin barrier & retains moisture",
-          safety_level: "safe",
-        },
-        {
-          name: "hyaluronic acid",
-          benefit: "Deep hydration & plumping",
-          safety_level: "safe",
-        },
-        {
-          name: "niacinamide",
-          benefit: "Reduces redness & evens skin tone",
-          safety_level: "safe",
-        },
-        {
-          name: "cholesterol",
-          benefit: "Strengthens skin lipid barrier",
-          safety_level: "safe",
-        },
-        {
-          name: "phenoxyethanol",
-          benefit: "Preservative to prevent bacterial growth",
-          safety_level: "caution",
-        },
-      ],
-      recommendations: [
-        "Great choice for dry and sensitive skin types.",
-        "Apply on damp skin to lock in hydration.",
-        "Pair with a gentle cleanser for best results.",
-      ],
-    },
-  },
-  {
-    id: "h2",
-    productName: "The Ordinary Niacinamide 10% + Zinc 1%",
-    date: "2026-03-04T09:15:00",
-    inputType: "text" as const,
-    result: {
-      skin_type: "oily",
-      safety_score: 8,
-      overall_rating: "Very Good — Safe for Most",
-      product_summary:
-        "A high-strength vitamin and mineral formula that targets blemishes and congestion. Suitable for oily and acne-prone skin.",
-      best_ingredients: ["niacinamide", "zinc pca"],
-      ingredients_to_watch: ["dimethyl isosorbide"],
-      allergen_warnings: [],
-      ingredients: [
-        {
-          name: "niacinamide",
-          benefit: "Controls sebum & minimizes pores",
-          safety_level: "safe",
-        },
-        {
-          name: "zinc pca",
-          benefit: "Antibacterial & oil control",
-          safety_level: "safe",
-        },
-        {
-          name: "dimethyl isosorbide",
-          benefit: "Penetration enhancer",
-          safety_level: "caution",
-        },
-      ],
-      recommendations: [
-        "Use in the AM routine before moisturizer.",
-        "Avoid combining with Vitamin C serums in the same routine.",
-      ],
-    },
-  },
-  {
-    id: "h3",
-    productName: "Neutrogena Ultra Sheer Sunscreen SPF 70",
-    date: "2026-03-02T16:45:00",
-    inputType: "image" as const,
-    result: {
-      skin_type: "combination",
-      safety_score: 6,
-      overall_rating: "Moderate — Some Concerns",
-      product_summary:
-        "A lightweight chemical sunscreen with broad-spectrum protection. Contains effective UV filters but some ingredients may cause sensitivity.",
-      best_ingredients: ["vitamin e", "glycerin"],
-      ingredients_to_watch: ["oxybenzone", "octinoxate", "fragrance"],
-      allergen_warnings: ["oxybenzone", "fragrance"],
-      ingredients: [
-        {
-          name: "avobenzone",
-          benefit: "UVA protection",
-          safety_level: "caution",
-        },
-        {
-          name: "oxybenzone",
-          benefit: "Broad-spectrum UV filter",
-          safety_level: "avoid",
-        },
-        {
-          name: "octinoxate",
-          benefit: "UVB protection",
-          safety_level: "caution",
-        },
-        {
-          name: "vitamin e",
-          benefit: "Antioxidant protection",
-          safety_level: "safe",
-        },
-        { name: "glycerin", benefit: "Hydration", safety_level: "safe" },
-        { name: "fragrance", benefit: "Scent", safety_level: "avoid" },
-      ],
-      recommendations: [
-        "Consider switching to a mineral sunscreen with zinc oxide.",
-        "If you have sensitive skin, oxybenzone may cause irritation.",
-        "Reapply every 2 hours for effective protection.",
-      ],
-    },
-  },
-  {
-    id: "h4",
-    productName: "La Roche-Posay Toleriane Cleanser",
-    date: "2026-02-28T11:30:00",
-    inputType: "text" as const,
-    result: {
-      skin_type: "sensitive",
-      safety_score: 9,
-      overall_rating: "Excellent — Gentle Formula",
-      product_summary:
-        "A gentle, soap-free cleanser formulated with prebiotic thermal water and ceramide-3 for sensitive skin.",
-      best_ingredients: [
-        "ceramide-3",
-        "niacinamide",
-        "glycerin",
-        "thermal water",
-      ],
-      ingredients_to_watch: [],
-      allergen_warnings: [],
-      ingredients: [
-        { name: "ceramide-3", benefit: "Barrier repair", safety_level: "safe" },
-        {
-          name: "niacinamide",
-          benefit: "Soothes & strengthens",
-          safety_level: "safe",
-        },
-        {
-          name: "glycerin",
-          benefit: "Moisture retention",
-          safety_level: "safe",
-        },
-        {
-          name: "thermal water",
-          benefit: "Mineral-rich soothing",
-          safety_level: "safe",
-        },
-      ],
-      recommendations: [
-        "Perfect for double cleansing routine.",
-        "Safe for twice-daily use.",
-      ],
-    },
-  },
-  {
-    id: "h5",
-    productName: "Garnier Skin Active Micellar Water",
-    date: "2026-02-25T20:10:00",
-    inputType: "image" as const,
-    result: {
-      skin_type: "normal",
-      safety_score: 7,
-      overall_rating: "Good — Generally Safe",
-      product_summary:
-        "A no-rinse micellar cleansing water that removes makeup and impurities. Contains mild surfactants but also synthetic fragrance.",
-      best_ingredients: ["glycerin", "disodium cocoamphodiacetate"],
-      ingredients_to_watch: ["fragrance", "peg-6 caprylic/capric glycerides"],
-      allergen_warnings: ["fragrance"],
-      ingredients: [
-        { name: "glycerin", benefit: "Hydration", safety_level: "safe" },
-        {
-          name: "disodium cocoamphodiacetate",
-          benefit: "Mild surfactant",
-          safety_level: "safe",
-        },
-        {
-          name: "hexylene glycol",
-          benefit: "Solvent & emollient",
-          safety_level: "caution",
-        },
-        { name: "fragrance", benefit: "Scent", safety_level: "avoid" },
-        {
-          name: "peg-6 caprylic/capric glycerides",
-          benefit: "Emulsifier",
-          safety_level: "caution",
-        },
-      ],
-      recommendations: [
-        "For sensitive skin, look for the fragrance-free version.",
-        "Follow up with a proper cleanser for deep cleaning.",
-      ],
-    },
-  },
-];
+// Helper to parse ragResponse JSON string into result object
+const parseRagResponse = (ragResponse: string | null): any => {
+  if (!ragResponse) return null;
+  try {
+    let parsed = JSON.parse(ragResponse);
+    if (parsed && parsed.response) parsed = parsed.response;
+    return parsed;
+  } catch {
+    return null;
+  }
+};
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -320,10 +111,41 @@ const UserDashboard = () => {
   const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(
     null,
   );
+  const [historyData, setHistoryData] = useState<any[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  const SPRING_BOOT_URL = "http://localhost:8080";
+
+  // Fetch analysis history from backend
+  const fetchHistory = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+    setHistoryLoading(true);
+    try {
+      const res = await fetch(
+        `${SPRING_BOOT_URL}/api/chemicalIngredients/history`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setHistoryData(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch history:", err);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "history") fetchHistory();
+  }, [activeTab]);
 
   const selectedHistory = useMemo(
-    () => SAMPLE_HISTORY.find((h) => h.id === selectedHistoryId) ?? null,
-    [selectedHistoryId],
+    () => historyData.find((h: any) => h.id === selectedHistoryId) ?? null,
+    [selectedHistoryId, historyData],
   );
 
   const skinTypes = [
@@ -418,8 +240,6 @@ const UserDashboard = () => {
         //         IMPORTANT: Do NOT set "Content-Type" header manually —
         //         the browser auto-sets it to "multipart/form-data" with
         //         the correct boundary when using FormData.
-        const SPRING_BOOT_URL = "http://localhost:8080";
-
         const response = await fetch(
           `${SPRING_BOOT_URL}/api/chemicalIngredients/`,
           {
@@ -1007,10 +827,36 @@ const UserDashboard = () => {
 
         {activeTab === "history" && (
           <div>
-            {/* ── Detail View ── */}
-            {selectedHistory ? (
+            {/* Loading State */}
+            {historyLoading ? (
+              <div className="flex flex-col items-center justify-center py-20">
+                <Loader2 className="w-10 h-10 text-blue-500 animate-spin mb-4" />
+                <p className="text-slate-500">Loading analysis history...</p>
+              </div>
+            ) : historyData.length === 0 ? (
+              /* Empty State */
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-6">
+                  <FlaskConical className="w-10 h-10 text-blue-400" />
+                </div>
+                <h2 className="text-xl font-bold text-slate-900 mb-2">
+                  No Analyses Yet
+                </h2>
+                <p className="text-slate-500 max-w-md mb-8">
+                  You haven't analysed any products yet. Upload an image or
+                  enter ingredients to get started with your first analysis.
+                </p>
+                <button
+                  className="btn-primary px-8 py-3"
+                  onClick={() => setActiveTab("analyze")}
+                >
+                  <Search className="w-5 h-5" />
+                  Start Analysing
+                </button>
+              </div>
+            ) : selectedHistory ? (
+              /* ── Detail View ── */
               <div className="space-y-6">
-                {/* Back button + header */}
                 <button
                   onClick={() => setSelectedHistoryId(null)}
                   className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
@@ -1023,32 +869,34 @@ const UserDashboard = () => {
                   <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
                     <div>
                       <h2 className="text-xl font-bold text-slate-900">
-                        {selectedHistory.productName}
+                        Analysis — {selectedHistory.skinType}
                       </h2>
                       <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
-                        <span className="inline-flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5" />
-                          {new Date(selectedHistory.date).toLocaleDateString(
-                            "en-IN",
-                            {
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            },
-                          )}
-                        </span>
-                        <span className="inline-flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
-                          {new Date(selectedHistory.date).toLocaleTimeString(
-                            "en-IN",
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            },
-                          )}
-                        </span>
+                        {selectedHistory.createdAt && (
+                          <>
+                            <span className="inline-flex items-center gap-1">
+                              <Calendar className="w-3.5 h-3.5" />
+                              {new Date(
+                                selectedHistory.createdAt,
+                              ).toLocaleDateString("en-IN", {
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              })}
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                              <Clock className="w-3.5 h-3.5" />
+                              {new Date(
+                                selectedHistory.createdAt,
+                              ).toLocaleTimeString("en-IN", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                          </>
+                        )}
                         <span className="inline-flex items-center gap-1 capitalize px-2 py-0.5 rounded-full bg-slate-100 text-xs font-medium">
-                          {selectedHistory.inputType === "image" ? (
+                          {selectedHistory.imageUrl ? (
                             <>
                               <Upload className="w-3 h-3" /> Image
                             </>
@@ -1058,43 +906,54 @@ const UserDashboard = () => {
                             </>
                           )}
                         </span>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-medium ${selectedHistory.status === "COMPLETED" ? "bg-emerald-100 text-emerald-700" : selectedHistory.status === "FAILED" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}
+                        >
+                          {selectedHistory.status}
+                        </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Reuse the same beautiful result cards */}
+                  {/* Render parsed RAG result */}
                   {(() => {
-                    const r = selectedHistory.result;
+                    const r = parseRagResponse(selectedHistory.ragResponse);
+                    if (!r)
+                      return (
+                        <p className="text-sm text-slate-500">
+                          No analysis result available for this record.
+                        </p>
+                      );
                     return (
                       <div className="space-y-6">
                         {/* Score header */}
                         <div
-                          className={`rounded-2xl border p-6 ${getScoreBg(r.safety_score)}`}
+                          className={`rounded-2xl border p-6 ${getScoreBg(r.safety_score || 0)}`}
                         >
                           <div className="flex items-center justify-between flex-wrap gap-4">
                             <div className="flex items-center gap-4">
                               <div
-                                className={`text-5xl font-bold ${getScoreColor(r.safety_score)}`}
+                                className={`text-5xl font-bold ${getScoreColor(r.safety_score || 0)}`}
                               >
-                                {r.safety_score}
+                                {r.safety_score || "?"}
                                 <span className="text-lg font-normal text-slate-400">
                                   /10
                                 </span>
                               </div>
                               <div>
                                 <h3 className="text-lg font-semibold text-slate-900">
-                                  {r.overall_rating}
+                                  {r.overall_rating || "Analysis Complete"}
                                 </h3>
                                 <p className="text-sm text-slate-600">
                                   Skin Type:{" "}
                                   <span className="font-medium capitalize">
-                                    {r.skin_type}
+                                    {r.skin_type || selectedHistory.skinType}
                                   </span>
                                 </p>
                               </div>
                             </div>
                             <ShieldCheck
-                              className={`w-8 h-8 ${getScoreColor(r.safety_score)}`}
+                              className={`w-8 h-8 ${getScoreColor(r.safety_score || 0)}`}
                             />
                           </div>
                         </div>
@@ -1255,18 +1114,20 @@ const UserDashboard = () => {
                     Recent Analyses
                   </h2>
                   <span className="text-sm text-slate-500">
-                    {SAMPLE_HISTORY.length} results
+                    {historyData.length} results
                   </span>
                 </div>
 
-                {SAMPLE_HISTORY.map((item) => {
-                  const scoreColor = getScoreColor(item.result.safety_score);
-                  const scoreBg = getScoreBg(item.result.safety_score);
+                {historyData.map((item: any) => {
+                  const parsed = parseRagResponse(item.ragResponse);
+                  const score = parsed?.safety_score || 0;
+                  const scoreColor = getScoreColor(score);
+                  const scoreBg = getScoreBg(score);
                   return (
                     <button
                       key={item.id}
                       onClick={() => setSelectedHistoryId(item.id)}
-                      className={`w-full text-left bg-white rounded-2xl border border-slate-200 border-l-4 ${getScoreBorderLeft(item.result.safety_score)} p-5 hover:border-blue-300 hover:border-l-blue-500 hover:shadow-md transition-all duration-200 group overflow-hidden`}
+                      className={`w-full text-left bg-white rounded-2xl border border-slate-200 border-l-4 ${getScoreBorderLeft(score)} p-5 hover:border-blue-300 hover:border-l-blue-500 hover:shadow-md transition-all duration-200 group overflow-hidden`}
                     >
                       <div className="flex items-center gap-4">
                         {/* Score circle */}
@@ -1276,7 +1137,7 @@ const UserDashboard = () => {
                           <span
                             className={`text-xl font-bold leading-none ${scoreColor}`}
                           >
-                            {item.result.safety_score}
+                            {score || "?"}
                           </span>
                           <span className="text-[10px] text-slate-400">
                             /10
@@ -1286,32 +1147,36 @@ const UserDashboard = () => {
                         {/* Info */}
                         <div className="flex-1 min-w-0">
                           <h3 className="text-sm font-semibold text-slate-900 truncate group-hover:text-blue-700 transition-colors">
-                            {item.productName}
+                            {parsed?.overall_rating ||
+                              `Analysis — ${item.skinType}`}
                           </h3>
                           <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-500">
-                            <span className="inline-flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {new Date(item.date).toLocaleDateString("en-IN", {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              })}
-                            </span>
+                            {item.createdAt && (
+                              <span className="inline-flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {new Date(item.createdAt).toLocaleDateString(
+                                  "en-IN",
+                                  {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  },
+                                )}
+                              </span>
+                            )}
                             <span className="inline-flex items-center gap-1 capitalize">
                               <Package className="w-3 h-3" />
-                              {item.result.skin_type}
+                              {item.skinType}
                             </span>
-                            <span className="inline-flex items-center gap-1">
-                              {item.inputType === "image" ? (
-                                <Upload className="w-3 h-3" />
-                              ) : (
-                                <FileText className="w-3 h-3" />
-                              )}
-                              {item.inputType}
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-xs font-medium ${item.status === "COMPLETED" ? "bg-emerald-100 text-emerald-700" : item.status === "FAILED" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}
+                            >
+                              {item.status}
                             </span>
                           </div>
                           <p className="text-xs text-slate-400 mt-1 truncate">
-                            {item.result.overall_rating}
+                            {parsed?.product_summary ||
+                              "Analysis in progress..."}
                           </p>
                         </div>
 

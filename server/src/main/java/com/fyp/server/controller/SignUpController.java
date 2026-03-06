@@ -42,9 +42,9 @@ public class SignUpController {
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody SignUpRequestDTO req) {
         try {
-            User created = signUpService.signup(req);
+            signUpService.signup(req);
             return ResponseEntity.status(HttpStatus.CREATED).body(
-                    Map.of("message", "User created. Please verify OTP.", "email", created.getEmail())
+                    Map.of("message", "User created. Please verify OTP.", "email", req.getEmail())
             );
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
