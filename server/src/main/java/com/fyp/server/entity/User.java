@@ -2,6 +2,7 @@ package com.fyp.server.entity;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,6 +27,11 @@ public class User implements UserDetails {
     private String phone;
     private String gender;
     private Set<UserRole> roles = new HashSet<>();
+
+    private String providerId;
+
+//    @Enumerated(EnumType.STRING)
+    private AuthProviderType providerType;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -66,4 +72,10 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+    public String getUserId() {
+        return id;
+    }
+
+    @DBRef(lazy = true)
+    private List<UserChem> userChem = new ArrayList<>();
 }
