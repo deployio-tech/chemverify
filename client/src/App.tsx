@@ -10,11 +10,11 @@ import ExpertProfile from "./pages/ExpertProfile";
 import LogoutPage from "./pages/LogoutPage";
 import ForgotPassword from "./pages/ForgotPassword";
 import UserSignup from "./pages/UserSignup";
+import OAuthCallback from "./pages/OAuthCallback";
 import "./index.css";
 
 function App() {
   return (
-    
     <Router>
       <Routes>
         {/* Public Pages */}
@@ -24,6 +24,9 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/login/user" element={<UserLogin />} />
         <Route path="/login/expert" element={<ExpertLogin />} />
+
+        {/* OAuth Callback */}
+        <Route path="/oauth/callback" element={<OAuthCallback />} />
 
         {/* Forgot Password */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
