@@ -17,6 +17,8 @@ import {
 
 type Step = "email" | "otp" | "reset" | "success";
 
+const API_BASE_URL = "http://localhost:8080";
+
 const ForgotPassword = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("email");
@@ -61,7 +63,7 @@ const ForgotPassword = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/otp/send", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/otp/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, purpose: "FORGOT_PASSWORD" }),
@@ -86,7 +88,7 @@ const ForgotPassword = () => {
     setIsLoading(true);
     setError("");
     try {
-      const response = await fetch("/api/auth/otp/verify", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/otp/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -135,7 +137,7 @@ const ForgotPassword = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/otp/reset-password", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/otp/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -208,7 +210,7 @@ const ForgotPassword = () => {
     setIsLoading(true);
     setError("");
     try {
-      await fetch("/api/auth/otp/send", {
+      await fetch(`${API_BASE_URL}/api/auth/otp/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, purpose: "FORGOT_PASSWORD" }),
