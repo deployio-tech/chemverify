@@ -15,6 +15,8 @@ import OtpVerification from "../components/OtpVerification";
 
 type LoginStep = "credentials" | "otp";
 
+const API_BASE_URL = "http://localhost:8080";
+
 const ExpertLogin = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState<LoginStep>("credentials");
@@ -45,7 +47,7 @@ const ExpertLogin = () => {
 
     try {
       // Step 1: Validate credentials
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -67,7 +69,7 @@ const ExpertLogin = () => {
       setPendingLoginData(data);
 
       // Step 2: Send OTP
-      const otpResponse = await fetch("/api/auth/otp/send", {
+      const otpResponse = await fetch(`${API_BASE_URL}/api/auth/otp/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, purpose: "LOGIN_VERIFY" }),
