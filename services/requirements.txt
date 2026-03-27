@@ -3,6 +3,7 @@ langchain
 python-dotenv
 groq
 flask
+flask-cors
 gunicorn
 requests
 huggingface-hub
