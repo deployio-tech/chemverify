@@ -1,10 +1,20 @@
-pymongo
-langchain
-python-dotenv
-groq
-flask
-flask-cors
-gunicorn
-requests
-huggingface-hub
-numpy
+# Web Framework
+Flask==3.1.2
+flask-cors==6.0.2
+gunicorn==25.1.0
+Werkzeug==3.1.5
+
+# Database
+pymongo==4.16.0
+dnspython==2.8.0
+
+# LLM / AI
+groq==1.0.0
+huggingface-hub==0.36.0
+
+# Embeddings (used via HuggingFace InferenceClient)
+numpy==2.4.1
+
+# Utilities
+python-dotenv==1.2.1
+requests==2.32.5
