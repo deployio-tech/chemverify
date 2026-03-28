@@ -190,7 +190,7 @@ const ExpertDashboard = () => {
         {/* Page title */}
         <div className="mb-10">
           <p className="text-[10px] uppercase tracking-[0.2em] text-blue-400/70 font-semibold mb-2">
-            Dermatology · AI Formulation Engine
+           AI Formulation Engine
           </p>
           <h1 className="text-3xl font-bold tracking-tight">
             Custom Product Formulator
