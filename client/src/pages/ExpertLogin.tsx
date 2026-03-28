@@ -15,7 +15,7 @@ import OtpVerification from "../components/OtpVerification";
 
 type LoginStep = "credentials" | "otp";
 
-const API_BASE_URL = "http://localhost:8080";
+// const API_BASE_URL = "http://localhost:8080"; // Re-enable when login bypass is removed
 
 const ExpertLogin = () => {
   const navigate = useNavigate();
@@ -27,12 +27,7 @@ const ExpertLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Store login response data to use after OTP verification
-  const [pendingLoginData, setPendingLoginData] = useState<{
-    jwt: string;
-    id: string;
-    role: string;
-  } | null>(null);
+  // const [pendingLoginData, setPendingLoginData] = useState<{ jwt: string; id: string; role: string; } | null>(null); // Re-enable with real login
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,56 +40,23 @@ const ExpertLogin = () => {
 
     setIsLoading(true);
 
-    try {
-      // Step 1: Validate credentials
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          role: "DERMATOLOGIST",
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(errorData || "Login failed");
-      }
-
-      const data = await response.json();
-      // Don't store token yet — wait for OTP verification
-      setPendingLoginData(data);
-
-      // Step 2: Send OTP
-      const otpResponse = await fetch(`${API_BASE_URL}/api/auth/otp/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, purpose: "LOGIN_VERIFY" }),
-      });
-
-      if (!otpResponse.ok) {
-        throw new Error("Failed to send verification code");
-      }
-
-      // Move to OTP step
-      setStep("otp");
-    } catch (err: any) {
-      setError(err.message || "Login failed. Please check your credentials.");
-    } finally {
+    // ⚠️ TEMPORARY: Login bypass for development — skip API & OTP
+    setTimeout(() => {
+      localStorage.setItem("token", "dev-mock-token");
+      localStorage.setItem("userId", "dev-expert-001");
+      localStorage.setItem("role", "DERMATOLOGIST");
       setIsLoading(false);
-    }
+      navigate("/dashboard/expert");
+    }, 500);
   };
 
   const handleOtpVerified = () => {
-    // OTP verified — now store login data and navigate
-    if (pendingLoginData) {
-      localStorage.setItem("token", pendingLoginData.jwt);
-      localStorage.setItem("userId", pendingLoginData.id);
-      localStorage.setItem("role", pendingLoginData.role);
-    }
+    // ⚠️ TEMPORARY: OTP step is bypassed — this handler is not called
+    // if (pendingLoginData) {
+    //   localStorage.setItem("token", pendingLoginData.jwt);
+    //   localStorage.setItem("userId", pendingLoginData.id);
+    //   localStorage.setItem("role", pendingLoginData.role);
+    // }
     navigate("/dashboard/expert");
   };
 
