@@ -18,4 +18,8 @@ public class UserService {
     public User createUser(SignUpRequestDTO req) {
         return authService.signUpInternal(req);
     }
+
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
 }

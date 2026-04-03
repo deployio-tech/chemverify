@@ -31,7 +31,7 @@ public class oAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final UserRepository userRepository;
     private final AuthUtil authUtil;
 
-    @Value("${frontend.url:http://localhost:5173}")
+    @Value("${frontend.url:https://fyp-chemai.vercel.app}")
     private String frontendUrl;
 
     @Override

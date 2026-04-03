@@ -41,6 +41,7 @@ public class WebSecurityConfig {
                                 "/api/auth/login",
                                 "/api/auth/signup",
                                 "/oauth2/**",
+                                "/api/recommend/**",
                                 "/login/oauth2/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/dermatologist/**").hasRole("DERMATOLOGIST")
@@ -53,4 +54,4 @@ public class WebSecurityConfig {
 
         return http.build();
     }
-}
+}
