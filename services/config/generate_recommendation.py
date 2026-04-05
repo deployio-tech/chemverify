@@ -30,81 +30,46 @@ def generate_recommendation(
 ):
     """Build a formulation prompt from all three DB results and call the LLM."""
 
-    prompt = f"""
-You are a board-certified dermatologist and cosmetic chemist helping a
-pharmacist formulate a custom skincare product.
+    # ── truncate retrieved text to reduce token usage ───────────────────
+    def _trim(results, max_chars=250):
+        return [
+            {**r, "text": r["text"][:max_chars] if isinstance(r.get("text"), str) else r.get("text", "")}
+            for r in results
+        ]
 
-PRODUCT TO FORMULATE: {product_type}
+    ing_text     = "\n".join(f"- {r['text']}" for r in _trim(ingredient_results))
+    prod_text    = "\n".join(f"- {r['text']}" for r in _trim(product_formulation_results))
+    conc_text    = "\n".join(f"- {r['text']}" for r in _trim(concentration_results))
 
-TARGET PATIENT PROFILE:
-- Skin Type      : {skin_type}
-- Skin Condition  : {skin_condition}
-- Weather/Climate : {weather}
-- Skin Color/Tone : {skin_color}
+    prompt = f"""You are a dermatologist and cosmetic chemist helping formulate a custom skincare product.
 
-Use the retrieved knowledge below to build a scientifically-backed formulation.
+PRODUCT: {product_type} | SKIN: {skin_type} | CONDITION: {skin_condition} | WEATHER: {weather} | TONE: {skin_color}
 
-=== INGREDIENT KNOWLEDGE ===
-{json.dumps(ingredient_results, indent=2, default=str)}
+INGREDIENT KNOWLEDGE:
+{ing_text}
 
-=== PRODUCT FORMULATION KNOWLEDGE ===
-{json.dumps(product_formulation_results, indent=2, default=str)}
+FORMULATION KNOWLEDGE:
+{prod_text}
 
-=== CONCENTRATION GUIDELINES ===
-{json.dumps(concentration_results, indent=2, default=str)}
+CONCENTRATION GUIDELINES:
+{conc_text}
 
-INSTRUCTIONS:
-1. Provide a complete formulation for a "{product_type}" tailored to the
-   patient profile above.
-2. Include 8-10 ingredients. For EACH ingredient provide:
-   - name: the INCI / chemical name of the ingredient
-   - recommended_concentration: the safe & effective percentage or range
-     (e.g. "2-5%", "0.5%", "q.s.")
-   - role_in_product: its functional role in this specific product type
-     (e.g. Humectant, Emollient, Active, Emulsifier, Preservative,
-      Thickener, Solvent, pH Adjuster, Sunscreen Filter, Antioxidant, etc.)
-   - reason: why this ingredient suits this patient (under 15 words)
-   - caution: any warnings for this profile, or null if none
-3. Also provide:
-   - product_name_suggestion: a professional product name suggestion
-   - formulation_type: the vehicle/base type (e.g. "oil-in-water emulsion",
-     "gel-cream", "anhydrous balm", "aqueous gel", "water-in-oil emulsion")
-   - target_pH: recommended pH range for the final product
-   - shelf_life_estimate: estimated shelf life with proper preservation
-   - application_instructions: 2-3 sentences on how the patient should apply
-   - climate_considerations: special formulation notes for the given weather
-   - formulation_notes: 2-3 sentences of overall advice for the pharmacist
-     about this formulation (e.g. order of mixing, temperature sensitivity)
-4. Return ONLY valid JSON, no markdown, no extra text.
-
-Output format:
-
+Return ONLY valid JSON (no markdown) with this exact structure:
 {{
   "product_type": "{product_type}",
   "product_name_suggestion": "",
   "formulation_type": "",
   "target_pH": "",
   "shelf_life_estimate": "",
-  "patient_profile": {{
-    "skin_type": "{skin_type}",
-    "skin_condition": "{skin_condition}",
-    "weather": "{weather}",
-    "skin_color": "{skin_color}"
-  }},
+  "patient_profile": {{"skin_type": "{skin_type}", "skin_condition": "{skin_condition}", "weather": "{weather}", "skin_color": "{skin_color}"}},
   "formulation": [
-    {{
-      "name": "",
-      "recommended_concentration": "",
-      "role_in_product": "",
-      "reason": "",
-      "caution": null
-    }}
+    {{"name": "", "recommended_concentration": "", "role_in_product": "", "reason": "", "caution": null}}
   ],
   "application_instructions": "",
   "climate_considerations": "",
   "formulation_notes": ""
 }}
-"""
+Include 8 ingredients. Keep reasons under 12 words each."""
 
     raw = _ask_llm(prompt)
     return _clean_recommendation(raw)
@@ -127,7 +92,7 @@ def _ask_llm(prompt: str) -> str:
             {"role": "user", "content": prompt},
         ],
         temperature=0.3,
-        max_tokens=8192,
+        max_tokens=2048,
     )
     return completion.choices[0].message.content
 

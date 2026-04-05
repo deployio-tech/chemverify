@@ -1,4 +1,4 @@
-def vector_search(collection, query_embedding, limit=5):
+def vector_search(collection, query_embedding, limit=3):
     pipeline = [
         {
             "$vectorSearch": {
