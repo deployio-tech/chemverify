@@ -114,7 +114,7 @@ const UserDashboard = () => {
   const [historyData, setHistoryData] = useState<any[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
-  const SPRING_BOOT_URL = "http://localhost:8080";
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
   // Fetch analysis history from backend
   const fetchHistory = async () => {
@@ -123,7 +123,7 @@ const UserDashboard = () => {
     setHistoryLoading(true);
     try {
       const res = await fetch(
-        `${SPRING_BOOT_URL}/api/chemicalIngredients/history`,
+        `${API_BASE_URL}/api/chemicalIngredients/history`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -241,7 +241,7 @@ const UserDashboard = () => {
         //         the browser auto-sets it to "multipart/form-data" with
         //         the correct boundary when using FormData.
         const response = await fetch(
-          `${SPRING_BOOT_URL}/api/chemicalIngredients/`,
+          `${API_BASE_URL}/api/chemicalIngredients/`,
           {
             method: "POST",
             headers: {
