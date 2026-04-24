@@ -68,6 +68,8 @@ function roleColor(role: string) {
   return key ? ROLE_COLORS[key] : ROLE_COLORS.default;
 }
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 /* ─── Main component ─────────────────────────────────────────────────────── */
 const ExpertDashboard = () => {
   const navigate = useNavigate();
@@ -104,7 +106,7 @@ const ExpertDashboard = () => {
     setResult(null);
     setIsGenerating(true);
     try {
-      const res = await fetch("http://localhost:8080/api/recommend", {
+      const res = await fetch(`${API_BASE_URL}/api/recommend`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

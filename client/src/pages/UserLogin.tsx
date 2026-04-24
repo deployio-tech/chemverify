@@ -79,8 +79,9 @@ const UserLogin = () => {
     } catch (err: any) {
       sileo.error({
         title: "Authentication failed",
-        description:
-          err.message || "Please check your credentials and try again.",
+        description: (<span className="text-red-500/70! font-medium!">
+          {"Failed To Login!! Please check your credentials and try again."}
+        </span>),
       });
     } finally {
       setIsLoading(false);
