@@ -303,7 +303,11 @@ const UserDashboard = () => {
 
         sileo.success({
           title: "Analysis Complete!",
-          description: "Scroll down to check the analysis results.",
+          description: (
+            <span className="text-green-500/50! font-medium!">{
+              "Scroll down to check the analysis results."}
+            </span>
+            ),
         });
       }
     } catch (error: any) {
