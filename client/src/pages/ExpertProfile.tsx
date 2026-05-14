@@ -237,7 +237,7 @@ const ExpertProfile = () => {
               <div className="flex items-center gap-2 justify-center md:justify-start flex-wrap">
                 <span className="px-3 py-1 bg-blue-500/20 rounded-full text-xs font-semibold text-blue-300 border border-blue-500/30">
                   <Stethoscope className="w-3 h-3 inline mr-1" />
-                  Dermatologist
+                  Pharmcist
                 </span>
                 <span className="px-3 py-1 bg-emerald-500/20 rounded-full text-xs font-semibold text-emerald-300 border border-emerald-500/30">
                   <Shield className="w-3 h-3 inline mr-1" />
@@ -348,7 +348,7 @@ const ExpertProfile = () => {
                     <div>
                       <p className="text-sm text-slate-500">Account Role</p>
                       <p className="text-white font-medium">
-                        Dermatologist / Expert
+                        DERMATOLOGIST / Expert
                       </p>
                     </div>
                     <span className="px-3 py-1 bg-blue-500/10 text-blue-400 rounded-full text-xs font-medium border border-blue-500/20">
