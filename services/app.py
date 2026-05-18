@@ -9,13 +9,14 @@ CORS(app)
 app.register_blueprint(search_bp)
 app.register_blueprint(recommend_bp)
 
+@app.route("/", methods=["GET"])
+def index():
+    client.admin.command("ping")
+    response = client2.admin.command("ping")
+    return {"status": "MongoDB connected", "response": response}
 
 @app.route("/health", methods=["GET"])
 def health():
     client.admin.command("ping")
     response = client2.admin.command("ping")
-
-    return {"status": "MongoDB connected","response":response}
-
-# if __name__ == "__main__":
-#     app.run(debug=True)
+    return {"status": "MongoDB connected", "response": response}
